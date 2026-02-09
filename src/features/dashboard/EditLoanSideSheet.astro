@@ -1,0 +1,144 @@
+---
+import SideSheet from "../../components/ui/SideSheet.astro";
+import TextField from "../../components/ui/TextField.astro";
+import Button from "../../components/ui/Button.astro";
+---
+
+<SideSheet id="edit-loan-sidesheet" title="Editar Préstamo">
+  <form class="flex flex-col gap-6" id="edit-loan-form">
+    <input type="hidden" id="edit-loan-id" />
+    <div class="flex flex-col gap-5">
+      <TextField
+        label="Alumno"
+        placeholder=""
+        readonly
+        id="edit-loan-student"
+        class="opacity-70"
+      />
+      <TextField
+        label="Libro"
+        placeholder=""
+        readonly
+        id="edit-loan-book"
+        class="opacity-70"
+      />
+
+      <div class="grid grid-cols-2 gap-4">
+        <TextField
+          label="Fecha Préstamo"
+          type="date"
+          required
+          id="edit-loan-date"
+        />
+        <TextField
+          label="Fecha Vencimiento"
+          type="date"
+          required
+          id="edit-loan-due-date"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label
+          class="text-sm font-medium text-[var(--m3-sys-on-surface-variant)] ml-1"
+          >Estado</label
+        >
+        <select
+          id="edit-loan-status"
+          class="w-full px-4 py-3 rounded-[var(--m3-radius-lg)] border border-[var(--m3-sys-outline)] bg-[var(--m3-sys-surface)] text-[var(--m3-sys-on-surface)] outline-none focus:border-[var(--m3-sys-primary)] transition-all"
+        >
+          <option value="Activo">Activo</option>
+          <option value="Vencido">Vencido</option>
+          <option value="Devuelto">Devuelto</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3 mt-4">
+      <Button md-type="submit" class="w-full !py-4 shadow-lg text-base">
+        Guardar Cambios
+      </Button>
+      <Button
+        variant="text"
+        onclick="window.closeEditLoanSidesheet()"
+        class="w-full">Cancelar</Button
+      >
+    </div>
+  </form>
+</SideSheet>
+
+<script>
+  import { updateLoan } from "../../services/firebase/loans";
+
+  const form = document.getElementById("edit-loan-form");
+
+  // @ts-ignore
+  window.populateEditLoanForm = (loan) => {
+    (document.getElementById("edit-loan-id") as HTMLInputElement).value =
+      loan.id;
+    (document.getElementById("edit-loan-student") as HTMLInputElement).value =
+      loan.studentName;
+    (document.getElementById("edit-loan-book") as HTMLInputElement).value =
+      loan.bookTitle;
+    (document.getElementById("edit-loan-date") as HTMLInputElement).value =
+      loan.loanDate;
+    (document.getElementById("edit-loan-due-date") as HTMLInputElement).value =
+      loan.dueDate;
+
+    // Select Status
+    const statusSelect = document.getElementById(
+      "edit-loan-status",
+    ) as HTMLSelectElement;
+    // Map status from service to Spanish selection options available in form
+    // Form options: Activo, Vencido, Devuelto
+    const statusMap: Record<string, string> = {
+      active: "Activo",
+      overdue: "Vencido",
+      returned: "Devuelto",
+    };
+    // Reverse logic if needed? We need to set the value that MATCHES the output
+    // Wait, the form has OPTIONS: Activo, Vencido, Devuelto.
+    // The loan object comes with status: "active" | "overdue" | "returned".
+    // So we need to map it.
+    if (statusMap[loan.status]) {
+      statusSelect.value = statusMap[loan.status];
+    }
+  };
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = (document.getElementById("edit-loan-id") as HTMLInputElement)
+      .value;
+    const loanDate = (
+      document.getElementById("edit-loan-date") as HTMLInputElement
+    ).value;
+    const dueDate = (
+      document.getElementById("edit-loan-due-date") as HTMLInputElement
+    ).value;
+    const statusVal = (
+      document.getElementById("edit-loan-status") as HTMLSelectElement
+    ).value;
+
+    // Map back to English status key
+    const statusMapReverse: Record<string, "active" | "overdue" | "returned"> =
+      {
+        Activo: "active",
+        Vencido: "overdue",
+        Devuelto: "returned",
+      };
+
+    try {
+      await updateLoan(id, {
+        loanDate,
+        dueDate,
+        status: statusMapReverse[statusVal],
+      });
+      // @ts-ignore
+      window.closeEditLoanSidesheet();
+    } catch (error) {
+      console.error("Error updating loan", error);
+      alert("Error al actualizar préstamo");
+    }
+  });
+</script>

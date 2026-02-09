@@ -1,0 +1,70 @@
+<div
+  id="book-category-chart"
+  class="w-full h-full min-h-[300px] flex items-center justify-center"
+>
+</div>
+
+<script>
+  import ApexCharts from "apexcharts";
+
+  const options = {
+    series: [44, 55, 13, 33],
+    labels: ["Ingeniería", "Literatura", "Ciencias", "Historia"],
+    chart: {
+      width: 380,
+      type: "donut",
+      fontFamily: "inherit",
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: "Total",
+              color: "var(--m3-sys-on-surface)",
+              formatter: function (w: any) {
+                return w.globals.seriesTotals.reduce((a: any, b: any) => {
+                  return a + b;
+                }, 0);
+              },
+            },
+            value: {
+              color: "var(--m3-sys-on-surface)",
+              fontSize: "24px",
+              fontWeight: 600,
+            },
+          },
+        },
+      },
+    },
+    stroke: {
+      show: false,
+    },
+    legend: {
+      position: "bottom",
+      labels: {
+        colors: "var(--m3-sys-on-surface)",
+      },
+    },
+    colors: ["#1565C0", "#42A5F5", "#90CAF9", "#1E88E5"],
+    tooltip: {
+      theme: "dark",
+    },
+  };
+
+  function renderChart() {
+    const chartElement = document.querySelector("#book-category-chart");
+    if (chartElement) {
+      const chart = new ApexCharts(chartElement, options);
+      chart.render();
+    }
+  }
+
+  renderChart();
+  document.addEventListener("astro:page-load", renderChart);
+</script>

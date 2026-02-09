@@ -1,0 +1,327 @@
+---
+import SideSheet from "../../components/ui/SideSheet.astro";
+import TextField from "../../components/ui/TextField.astro";
+import Button from "../../components/ui/Button.astro";
+import { books } from "../../data/books";
+---
+
+<SideSheet id="registration-sidesheet" title="Nuevo Registro de Préstamo">
+  <form
+    class="flex flex-col gap-8"
+    onsubmit="event.preventDefault(); window.registerLoan();"
+  >
+    <div class="flex flex-col gap-5">
+      <TextField
+        label="Matrícula del Alumno"
+        placeholder="Ej. 20240001"
+        required
+        id="reg-matricula"
+      />
+
+      <div class="flex flex-col gap-3">
+        <label
+          class="text-sm font-medium text-[var(--m3-sys-on-surface-variant)]"
+          >Libros a Prestar</label
+        >
+
+        <div class="flex gap-2">
+          <div class="relative flex-1 group">
+            <div class="relative">
+              <input
+                type="text"
+                id="book-search"
+                placeholder="Buscar por título o ID..."
+                class="peer w-full px-4 py-3 rounded-[var(--m3-radius-sm)] bg-[var(--m3-sys-surface-variant)]/30 border-b-2 border-[var(--m3-sys-outline-variant)] text-[var(--m3-sys-on-surface)] text-base focus:outline-none focus:border-[var(--m3-sys-primary)] transition-colors placeholder:text-[var(--m3-sys-on-surface-variant)]/50"
+                autocomplete="off"
+              />
+              <div
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--m3-sys-on-surface-variant)] pointer-events-none"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><circle cx="11" cy="11" r="8"></circle><path
+                    d="m21 21-4.3-4.3"></path></svg
+                >
+              </div>
+            </div>
+
+            <!-- Search Results Dropdown -->
+            <div
+              id="book-dropdown"
+              class="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--m3-sys-surface)] rounded-[var(--m3-radius-md)] shadow-lg border border-[var(--m3-sys-outline-variant)] max-h-60 overflow-y-auto hidden"
+            >
+              <ul id="book-options-list" class="flex flex-col py-2">
+                <!-- Options will be injected here -->
+              </ul>
+            </div>
+          </div>
+          <Button type="button" variant="outlined" id="btn-add-book">
+            Agregar
+          </Button>
+        </div>
+
+        <!-- Selected Books List -->
+        <div
+          id="selected-books-list"
+          class="flex flex-col gap-2 mt-2 empty:hidden"
+        >
+          <!-- Items will be injected here via JS -->
+        </div>
+        <p id="no-books-msg" class="text-sm text-[var(--m3-sys-error)] hidden">
+          Debes seleccionar al menos un libro.
+        </p>
+      </div>
+
+      <TextField
+        label="Fecha de Devolución"
+        type="date"
+        value={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0]}
+        required
+        id="reg-fecha"
+      />
+    </div>
+
+    <div class="flex flex-col gap-3 mt-4">
+      <Button type="submit" class="w-full !py-4 shadow-lg text-base"
+        >Guardar Registro</Button
+      >
+      <Button
+        variant="text"
+        onclick="window.closeRegistrationSidesheet()"
+        class="w-full">Cancelar</Button
+      >
+    </div>
+  </form>
+</SideSheet>
+
+<script define:vars={{ books }}>
+  let selectedBooks = [];
+  let currentSelectedBookId = null;
+
+  const bookSearch = document.getElementById("book-search");
+  const bookDropdown = document.getElementById("book-dropdown");
+  const bookOptionsList = document.getElementById("book-options-list");
+  const btnAddBook = document.getElementById("btn-add-book");
+  const selectedList = document.getElementById("selected-books-list");
+  const noBooksMsg = document.getElementById("no-books-msg");
+
+  function filterBooks(query) {
+    if (!query) return [];
+    const lowerQuery = query.toLowerCase();
+    return books.filter(
+      (book) =>
+        book.title.toLowerCase().includes(lowerQuery) ||
+        book.id.toLowerCase().includes(lowerQuery),
+    );
+  }
+
+  function renderOptions(options) {
+    if (!bookOptionsList) return;
+    bookOptionsList.innerHTML = "";
+
+    if (options.length === 0) {
+      const noResult = document.createElement("li");
+      noResult.className =
+        "px-4 py-3 text-sm text-[var(--m3-sys-on-surface-variant)] italic";
+      noResult.textContent = "No se encontraron libros";
+      bookOptionsList.appendChild(noResult);
+      return;
+    }
+
+    options.forEach((book) => {
+      const li = document.createElement("li");
+      li.className =
+        "px-4 py-3 hover:bg-[var(--m3-sys-surface-variant)]/50 cursor-pointer transition-colors text-[var(--m3-sys-on-surface)] flex flex-col gap-0.5 border-b border-[var(--m3-sys-outline-variant)]/50 last:border-0";
+      li.innerHTML = `
+            <span class="font-medium text-sm">${book.title}</span>
+            <span class="text-xs text-[var(--m3-sys-on-surface-variant)]">ID: ${book.id} • ${book.available} disp.</span>
+          `;
+      li.onclick = () => selectBook(book);
+      bookOptionsList.appendChild(li);
+    });
+  }
+
+  function selectBook(book) {
+    if (!bookSearch) return;
+    bookSearch.value = book.title;
+    currentSelectedBookId = book.id;
+    if (bookDropdown) bookDropdown.classList.add("hidden");
+  }
+
+  bookSearch?.addEventListener("input", (e) => {
+    const query = e.target.value;
+    currentSelectedBookId = null; // Reset selection on edit
+
+    if (!query) {
+      if (bookDropdown) bookDropdown.classList.add("hidden");
+      return;
+    }
+
+    const filtered = filterBooks(query);
+    renderOptions(filtered);
+    if (bookDropdown) bookDropdown.classList.remove("hidden");
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!bookSearch?.contains(e.target) && !bookDropdown?.contains(e.target)) {
+      bookDropdown?.classList.add("hidden");
+    }
+  });
+
+  // Show dropdown on focus if empty
+  bookSearch?.addEventListener("focus", () => {
+    if (bookSearch.value && bookDropdown) {
+      bookDropdown.classList.remove("hidden");
+    }
+  });
+
+  function updateList() {
+    if (!selectedList) return;
+    selectedList.innerHTML = "";
+
+    selectedBooks.forEach((book, index) => {
+      const item = document.createElement("div");
+      item.className =
+        "flex items-center justify-between p-3 bg-[var(--m3-sys-surface-variant)]/30 rounded-[var(--m3-radius-md)] border border-[var(--m3-sys-outline-variant)] group";
+
+      // Content
+      const content = document.createElement("div");
+      content.className = "flex flex-col";
+      content.innerHTML = `<span class="text-sm font-medium text-[var(--m3-sys-on-surface)]">${book.title}</span><span class="text-xs text-[var(--m3-sys-on-surface-variant)]">ID: ${book.id}</span>`;
+      item.appendChild(content);
+
+      // Actions
+      const actions = document.createElement("div");
+      actions.className = "flex gap-1";
+
+      // Edit Button
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className =
+        "text-[var(--m3-sys-primary)] hover:bg-[var(--m3-sys-primary-container)] p-1.5 rounded-full transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100";
+      editBtn.title = "Editar";
+      editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`;
+      editBtn.onclick = () => editBook(index);
+      actions.appendChild(editBtn);
+
+      // Remove Button
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className =
+        "text-[var(--m3-sys-error)] hover:bg-[var(--m3-sys-error-container)] p-1.5 rounded-full transition-colors";
+      removeBtn.title = "Eliminar";
+      removeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`;
+      removeBtn.onclick = () => removeBook(index);
+      actions.appendChild(removeBtn);
+
+      item.appendChild(actions);
+      selectedList.appendChild(item);
+    });
+
+    if (selectedBooks.length > 0) {
+      noBooksMsg?.classList.add("hidden");
+    } else {
+      noBooksMsg?.classList.remove("hidden");
+    }
+  }
+
+  function removeBook(index) {
+    selectedBooks.splice(index, 1);
+    updateList();
+  }
+
+  function editBook(index) {
+    const book = selectedBooks[index];
+    selectedBooks.splice(index, 1);
+    updateList();
+
+    // Set back to input
+    if (bookSearch) {
+      bookSearch.value = book.title;
+      currentSelectedBookId = book.id;
+      bookSearch.focus();
+      // Trigger search to show dropdown of other options if needed?
+      // Better to show the current one selected or filtered.
+    }
+  }
+
+  btnAddBook?.addEventListener("click", () => {
+    // Logic to handle 'Enter' key on input could also call this
+    if (!currentSelectedBookId) {
+      const query = bookSearch.value;
+      if (!query) return;
+
+      const exactMatch = books.find(
+        (b) => b.title.toLowerCase() === query.toLowerCase() || b.id === query,
+      );
+      if (exactMatch) {
+        currentSelectedBookId = exactMatch.id;
+      } else {
+        alert("Por favor selecciona un libro válido de la lista.");
+        return;
+      }
+    }
+
+    const id = currentSelectedBookId;
+    const book = books.find((b) => b.id === id);
+    if (!book) return;
+
+    // Check if already added
+    if (selectedBooks.some((b) => b.id === id)) {
+      alert("Este libro ya ha sido agregado a la lista.");
+      return;
+    }
+
+    selectedBooks.push({ id: book.id, title: book.title });
+    updateList();
+
+    // Reset
+    bookSearch.value = "";
+    currentSelectedBookId = null;
+    if (bookDropdown) bookDropdown.classList.add("hidden");
+  });
+
+  // Allow Enter key to add book
+  bookSearch?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      btnAddBook.click();
+    }
+  });
+
+  window.registerLoan = () => {
+    const matricula = document.getElementById("reg-matricula").value;
+    const fecha = document.getElementById("reg-fecha").value;
+
+    if (selectedBooks.length === 0) {
+      noBooksMsg?.classList.remove("hidden");
+      return;
+    }
+
+    console.log("Registrando préstamo:", {
+      matricula,
+      books: selectedBooks,
+      fecha,
+    });
+    alert(
+      `Préstamo registrado exitosamente para ${selectedBooks.length} libro(s).`,
+    );
+
+    // Reset and close
+    selectedBooks = [];
+    updateList();
+    document.getElementById("reg-matricula").value = "";
+    window.closeRegistrationSidesheet();
+  };
+</script>

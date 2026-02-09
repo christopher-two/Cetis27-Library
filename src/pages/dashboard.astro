@@ -1,0 +1,293 @@
+---
+import Layout from "../layouts/Layout.astro";
+import RegistrationSideSheet from "../features/registration/RegistrationSideSheet.astro";
+import ReturnSideSheet from "../features/returns/ReturnSideSheet.astro";
+import NewStudentSideSheet from "../features/students/NewStudentSideSheet.astro";
+import DigitalAccessSideSheet from "../features/digital/DigitalAccessSideSheet.astro";
+import LoansTrendChart from "../components/charts/LoansTrendChart.astro";
+import BookCategoryChart from "../components/charts/BookCategoryChart.astro";
+import UserActivityChart from "../components/charts/UserActivityChart.astro";
+import Card from "../components/ui/Card.astro";
+import Button from "../components/ui/Button.astro";
+import Sidebar from "../components/Sidebar.astro";
+import ThemeToggle from "../components/ui/ThemeToggle.astro";
+---
+
+<Layout>
+  <div class="flex min-h-screen bg-[var(--m3-sys-light-surface)]">
+    <!-- Sidebar -->
+    <Sidebar />
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 h-screen overflow-y-auto">
+      <!-- Header with Actions (Inlined from DashboardHeader) -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-[var(--m3-sys-on-surface)]">
+            Panel de Control
+          </h1>
+          <p class="text-[var(--m3-sys-on-surface-variant)] mt-1">
+            Resumen de actividad y acciones rápidas
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <Button
+            id="btn-digital-access-header"
+            variant="outlined"
+            class="flex gap-2 items-center !border-[var(--m3-sys-primary)] !text-[var(--m3-sys-primary)] hover:!bg-[var(--m3-sys-primary)] hover:!text-[var(--m3-sys-on-primary)] transition-all shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path
+                d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg
+            >
+            Biblioteca Digital
+          </Button>
+          <Button id="btn-new-loan-header" class="flex gap-2 items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><line x1="12" y1="5" x2="12" y2="19"></line><line
+                x1="5"
+                y1="12"
+                x2="19"
+                y2="12"></line></svg
+            >
+            Nuevo Registro
+          </Button>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card class="flex flex-col gap-2">
+          <span
+            class="text-[var(--m3-sys-on-surface-variant)] text-sm font-medium"
+            >Préstamos Activos</span
+          >
+          <span class="text-4xl font-normal text-[var(--m3-sys-primary)]"
+            >12</span
+          >
+          <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
+            >2 vencen hoy</span
+          >
+        </Card>
+        <Card class="flex flex-col gap-2">
+          <span
+            class="text-[var(--m3-sys-on-surface-variant)] text-sm font-medium"
+            >Préstamos Vencidos</span
+          >
+          <span class="text-4xl font-normal text-[var(--m3-sys-error)]">5</span>
+          <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
+            >Requieren atención</span
+          >
+        </Card>
+        <Card class="flex flex-col gap-2">
+          <span
+            class="text-[var(--m3-sys-on-surface-variant)] text-sm font-medium"
+            >Total Libros</span
+          >
+          <span class="text-4xl font-normal text-[var(--m3-sys-tertiary)]"
+            >1,240</span
+          >
+          <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
+            >85% disponibles</span
+          >
+        </Card>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <Card class="lg:col-span-2 min-h-[400px]">
+          <h3 class="text-lg font-medium text-[var(--m3-sys-on-surface)] mb-4">
+            Tendencia de Préstamos
+          </h3>
+          <LoansTrendChart />
+        </Card>
+        <Card class="min-h-[400px]">
+          <h3 class="text-lg font-medium text-[var(--m3-sys-on-surface)] mb-4">
+            Distribución por Categoría
+          </h3>
+          <BookCategoryChart />
+        </Card>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <Card class="lg:col-span-1 min-h-[400px]">
+          <h3 class="text-lg font-medium text-[var(--m3-sys-on-surface)] mb-4">
+            Actividad de Usuarios
+          </h3>
+          <UserActivityChart />
+        </Card>
+
+        <!-- Quick Actions Grid -->
+        <Card class="lg:col-span-2 flex flex-col justify-center">
+          <h3 class="text-lg font-medium text-[var(--m3-sys-on-surface)] mb-6">
+            Acciones Rápidas
+          </h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <button
+              id="btn-new-loan-card"
+              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-primary)]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path
+                    d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                  ></path><path d="M12 6v6"></path><path d="M9 9h6"></path></svg
+                >
+              </div>
+              <span class="text-sm font-medium">Prestar Libro</span>
+            </button>
+
+            <button
+              id="btn-return-card"
+              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-secondary)]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                  ></path><polyline points="7 10 12 15 17 10"></polyline><line
+                    x1="12"
+                    y1="15"
+                    x2="12"
+                    y2="3"></line></svg
+                >
+              </div>
+              <span class="text-sm font-medium">Devolución</span>
+            </button>
+
+            <button
+              id="btn-new-student-card"
+              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-tertiary)]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                  ></path><circle cx="8.5" cy="7" r="4"></circle><line
+                    x1="20"
+                    y1="8"
+                    x2="20"
+                    y2="14"></line><line x1="23" y1="11" x2="17" y2="11"
+                  ></line></svg
+                >
+              </div>
+              <span class="text-sm font-medium">Nuevo Alumno</span>
+            </button>
+
+            <button
+              id="btn-digital-access-card"
+              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-error)]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><rect x="3" y="3" width="18" height="18" rx="2" ry="2"
+                  ></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline
+                    points="21 15 16 10 5 21"></polyline></svg
+                >
+              </div>
+              <span class="text-sm font-medium">Acceso Digital</span>
+            </button>
+          </div>
+        </Card>
+      </div>
+
+      <RegistrationSideSheet />
+      <ReturnSideSheet />
+      <NewStudentSideSheet />
+      <DigitalAccessSideSheet />
+    </main>
+  </div>
+</Layout>
+
+<script>
+  function setupDashboardActions() {
+    // Helper to add click listeners safely
+    const addListener = (id: string, handler: () => void) => {
+      const btn = document.getElementById(id);
+      btn?.addEventListener("click", handler);
+    };
+
+    // Open Registration Sidesheet (New Loan)
+    const openRegistration = () =>
+      (window as any).openRegistrationSidesheet?.();
+    addListener("btn-new-loan-header", openRegistration);
+    addListener("btn-new-loan-card", openRegistration);
+
+    // Open Return Sidesheet
+    const openReturn = () => (window as any).openReturnSidesheet?.();
+    addListener("btn-return-card", openReturn);
+
+    // Open New Student Sidesheet
+    const openNewStudent = () => (window as any).openNewStudentSidesheet?.();
+    addListener("btn-new-student-card", openNewStudent);
+
+    // Open Digital Access Sidesheet
+    const openDigital = () => (window as any).openDigitalAccessSidesheet?.();
+    addListener("btn-digital-access-card", openDigital);
+    addListener("btn-digital-access-header", openDigital);
+  }
+
+  // Run on load and View Transitions
+  setupDashboardActions();
+  document.addEventListener("astro:page-load", setupDashboardActions);
+</script>

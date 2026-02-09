@@ -1,0 +1,52 @@
+---
+interface Props {
+  label: string;
+  placeholder?: string;
+  type?: "text" | "email" | "password" | "number" | "date";
+  required?: boolean;
+  value?: string;
+  id: string;
+  autofocus?: boolean;
+  readonly?: boolean;
+  class?: string;
+}
+
+const {
+  label,
+  placeholder = "",
+  type = "text",
+  required = false,
+  value = "",
+  id,
+  autofocus = false,
+  readonly = false,
+  class: className = "",
+} = Astro.props;
+---
+
+<div class:list={["flex flex-col gap-1.5 w-full", className]}>
+  <label
+    for={id}
+    class="text-xs font-medium text-[var(--m3-sys-light-on-surface-variant)] px-1"
+  >
+    {label}{
+      required && <span class="text-[var(--m3-sys-error)] ml-0.5">*</span>
+    }
+  </label>
+  <input
+    type={type}
+    id={id}
+    name={id}
+    class:list={[
+      "peer w-full px-4 py-3 rounded-[var(--m3-radius-lg)] border bg-[var(--m3-sys-surface)] text-[var(--m3-sys-on-surface)] placeholder-transparent outline-none transition-all",
+      readonly
+        ? "border-[var(--m3-sys-outline-variant)] opacity-70 cursor-not-allowed focus:border-[var(--m3-sys-outline-variant)]"
+        : "border-[var(--m3-sys-outline)] focus:border-[var(--m3-sys-primary)]",
+    ]}
+    placeholder={placeholder}
+    required={required}
+    value={value}
+    autofocus={autofocus}
+    readonly={readonly}
+  />
+</div>

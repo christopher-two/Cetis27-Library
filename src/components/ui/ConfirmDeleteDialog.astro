@@ -1,0 +1,65 @@
+---
+import Modal from "./Modal.astro";
+import Button from "./Button.astro";
+
+interface Props {
+  id: string;
+  title?: string;
+  description?: string;
+}
+
+const {
+  id,
+  title = "Confirmar eliminación",
+  description = "¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.",
+} = Astro.props;
+---
+
+<Modal id={id}>
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <h3 class="text-xl font-bold text-[var(--m3-sys-on-surface)]">{title}</h3>
+      <p class="text-[var(--m3-sys-on-surface-variant)]">{description}</p>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-4">
+      <Button
+        variant="text"
+        onclick={`window.close${
+          id
+            .replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+            .charAt(0)
+            .toUpperCase() +
+          id.replace(/-([a-z])/g, (g) => g[1].toUpperCase()).slice(1)
+        }()`}
+      >
+        Cancelar
+      </Button>
+      <Button
+        class="bg-[var(--m3-sys-error)] text-[var(--m3-sys-on-error)] hover:bg-[var(--m3-sys-error-container)] hover:text-[var(--m3-sys-on-error-container)]"
+        id={`${id}-confirm-btn`}
+      >
+        Eliminar
+      </Button>
+    </div>
+  </div>
+</Modal>
+
+<script define:vars={{ id }}>
+  // Expose a function to set the callback for the confirm button
+  const normalizedId = id.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+  const functionSuffix =
+    normalizedId.charAt(0).toUpperCase() + normalizedId.slice(1);
+
+  window[`setOnConfirm${functionSuffix}`] = (callback) => {
+    const confirmBtn = document.getElementById(`${id}-confirm-btn`);
+    // Remove previous event listeners to avoid duplicates if reused
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+    newBtn.addEventListener("click", () => {
+      callback();
+      window[`close${functionSuffix}`]();
+    });
+  };
+</script>

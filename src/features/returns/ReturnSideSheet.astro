@@ -1,0 +1,258 @@
+---
+import SideSheet from "../../components/ui/SideSheet.astro";
+import TextField from "../../components/ui/TextField.astro";
+import Button from "../../components/ui/Button.astro";
+---
+
+<SideSheet id="return-sidesheet" title="Registrar Devolución">
+  <form class="flex flex-col gap-8" onsubmit="window.processReturn(event)">
+    <div class="flex flex-col gap-5">
+      <div
+        class="p-4 bg-[var(--m3-sys-tertiary-container)]/30 rounded-lg border border-[var(--m3-sys-tertiary-container)] text-[var(--m3-sys-on-surface)]"
+      >
+        <p class="text-sm">
+          Ingrese el ID del préstamo o escanee el código del libro para procesar
+          la devolución.
+        </p>
+      </div>
+
+      <div class="relative group">
+        <label
+          for="return-search"
+          class="text-xs font-medium text-[var(--m3-sys-light-on-surface-variant)] px-1 mb-1.5 block"
+        >
+          ID del Préstamo / Código del Libro <span
+            class="text-[var(--m3-sys-error)] ml-0.5">*</span
+          >
+        </label>
+        <div class="relative">
+          <input
+            type="text"
+            id="return-search"
+            placeholder="Buscar por ID, Título o Alumno..."
+            class="peer w-full px-4 py-3 rounded-[var(--m3-radius-sm)] bg-[var(--m3-sys-surface-variant)]/30 border-b-2 border-[var(--m3-sys-outline-variant)] text-[var(--m3-sys-on-surface)] text-base focus:outline-none focus:border-[var(--m3-sys-primary)] transition-colors placeholder:text-[var(--m3-sys-on-surface-variant)]/50"
+            autocomplete="off"
+            autofocus
+          />
+          <div
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--m3-sys-on-surface-variant)] pointer-events-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"
+              ></path></svg
+            >
+          </div>
+        </div>
+
+        <!-- Search Results Dropdown -->
+        <div
+          id="return-dropdown"
+          class="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--m3-sys-surface)] rounded-[var(--m3-radius-md)] shadow-lg border border-[var(--m3-sys-outline-variant)] max-h-60 overflow-y-auto hidden"
+        >
+          <ul id="return-options-list" class="flex flex-col py-2">
+            <!-- Options will be injected here -->
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label
+          class="text-sm font-medium text-[var(--m3-sys-on-surface-variant)] ml-1"
+          >Estado del Libro</label
+        >
+        <select
+          id="return-status"
+          class="w-full px-4 py-3 rounded-[var(--m3-radius-lg)] border border-[var(--m3-sys-outline)] bg-[var(--m3-sys-surface)] text-[var(--m3-sys-on-surface)] outline-none focus:border-[var(--m3-sys-primary)] transition-all"
+        >
+          <option value="good" selected>Buen Estado</option>
+          <option value="damaged">Dañado</option>
+          <option value="lost">Perdido</option>
+        </select>
+      </div>
+
+      <TextField
+        label="Observaciones (Opcional)"
+        placeholder="Daños menores en portada..."
+        id="return-notes"
+      />
+    </div>
+
+    <div class="flex flex-col gap-3 mt-4">
+      <Button type="submit" class="w-full !py-4 shadow-lg text-base"
+        >Confirmar Devolución</Button
+      >
+      <Button
+        variant="text"
+        type="button"
+        onclick="window.closeReturnSidesheet()"
+        class="w-full">Cancelar</Button
+      >
+    </div>
+  </form>
+</SideSheet>
+
+<script>
+  // Mock Active Loans Data
+  const activeLoans = [
+    {
+      id: "L-2024-001",
+      bookTitle: "Cien años de soledad",
+      student: "Juan Pérez",
+      returnDate: "2024-02-15",
+    },
+    {
+      id: "L-2024-002",
+      bookTitle: "Clean Code",
+      student: "Maria González",
+      returnDate: "2024-02-20",
+    },
+    {
+      id: "L-2024-003",
+      bookTitle: "El Principito",
+      student: "Carlos López",
+      returnDate: "2024-02-10",
+    },
+    {
+      id: "L-2024-004",
+      bookTitle: "Don Quijote",
+      student: "Ana Martinez",
+      returnDate: "2024-02-25",
+    },
+    {
+      id: "L-2024-005",
+      bookTitle: "Javascript: The Good Parts",
+      student: "Sofia Rodriguez",
+      returnDate: "2024-02-18",
+    },
+  ];
+
+  let currentSelectedLoan = null;
+
+  const returnSearch = document.getElementById("return-search");
+  const returnDropdown = document.getElementById("return-dropdown");
+  const returnOptionsList = document.getElementById("return-options-list");
+
+  function filterLoans(query) {
+    if (!query) return [];
+    const lowerQuery = query.toLowerCase();
+    return activeLoans.filter(
+      (loan) =>
+        loan.id.toLowerCase().includes(lowerQuery) ||
+        loan.bookTitle.toLowerCase().includes(lowerQuery) ||
+        loan.student.toLowerCase().includes(lowerQuery),
+    );
+  }
+
+  function renderReturnOptions(options) {
+    if (!returnOptionsList) return;
+    returnOptionsList.innerHTML = "";
+
+    if (options.length === 0) {
+      const noResult = document.createElement("li");
+      noResult.className =
+        "px-4 py-3 text-sm text-[var(--m3-sys-on-surface-variant)] italic";
+      noResult.textContent = "No se encontraron préstamos activos";
+      returnOptionsList.appendChild(noResult);
+      return;
+    }
+
+    options.forEach((loan) => {
+      const li = document.createElement("li");
+      li.className =
+        "px-4 py-3 hover:bg-[var(--m3-sys-surface-variant)]/50 cursor-pointer transition-colors text-[var(--m3-sys-on-surface)] flex flex-col gap-0.5";
+      li.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="font-medium text-sm">${loan.bookTitle}</span>
+                    <span class="text-xs bg-[var(--m3-sys-primary-container)] text-[var(--m3-sys-on-primary-container)] px-2 py-0.5 rounded-full">${loan.id}</span>
+                </div>
+                <div class="flex justify-between text-xs text-[var(--m3-sys-on-surface-variant)]">
+                    <span>${loan.student}</span>
+                    <span>Vence: ${loan.returnDate}</span>
+                </div>
+            `;
+      li.onclick = () => selectLoan(loan);
+      returnOptionsList.appendChild(li);
+    });
+  }
+
+  function selectLoan(loan) {
+    if (!returnSearch) return;
+    returnSearch.value = `${loan.id} - ${loan.bookTitle}`;
+    currentSelectedLoan = loan;
+    if (returnDropdown) returnDropdown.classList.add("hidden");
+  }
+
+  returnSearch?.addEventListener("input", (e) => {
+    const query = e.target.value;
+    currentSelectedLoan = null; // Reset selection on edit
+
+    if (!query) {
+      if (returnDropdown) returnDropdown.classList.add("hidden");
+      return;
+    }
+
+    const filtered = filterLoans(query);
+    renderReturnOptions(filtered);
+    if (returnDropdown) returnDropdown.classList.remove("hidden");
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (
+      !returnSearch?.contains(e.target) &&
+      !returnDropdown?.contains(e.target)
+    ) {
+      returnDropdown?.classList.add("hidden");
+    }
+  });
+
+  // Handle form submission
+  window.processReturn = (e) => {
+    e.preventDefault();
+
+    // Allow manual entry if it matches an ID, otherwise warn
+    if (!currentSelectedLoan && returnSearch && returnSearch.value) {
+      const exactMatch = activeLoans.find(
+        (l) => l.id.toLowerCase() === returnSearch.value.toLowerCase(),
+      );
+      if (exactMatch) currentSelectedLoan = exactMatch;
+    }
+
+    const status = document.getElementById("return-status").value;
+    const notes = document.getElementById("return-notes").value;
+
+    if (!returnSearch || !returnSearch.value) {
+      alert(
+        "Por favor ingrese el ID del préstamo o seleccione uno de la lista.",
+      );
+      return;
+    }
+
+    console.log("Procesando devolución:", {
+      loan: currentSelectedLoan || { id: returnSearch.value, manual: true },
+      status,
+      notes,
+    });
+
+    alert(
+      `Devolución registrada exitosamente${currentSelectedLoan ? ` para ${currentSelectedLoan.bookTitle}` : ""}.`,
+    );
+
+    // Reset
+    if (returnSearch) returnSearch.value = "";
+    if (document.getElementById("return-notes"))
+      document.getElementById("return-notes").value = "";
+    currentSelectedLoan = null;
+
+    window.closeReturnSidesheet();
+  };
+</script>

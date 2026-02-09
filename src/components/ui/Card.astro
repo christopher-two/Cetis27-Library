@@ -1,0 +1,25 @@
+---
+interface Props {
+  variant?: "elevated" | "filled" | "outlined";
+  class?: string;
+}
+
+const { variant = "filled", class: className } = Astro.props;
+
+const variants = {
+  elevated: "bg-[var(--m3-sys-light-surface)] shadow-[var(--m3-elevation-1)]",
+  filled: "bg-[var(--m3-sys-light-surface-variant)]/30",
+  outlined:
+    "border border-[var(--m3-sys-light-outline)] bg-[var(--m3-sys-light-surface)]",
+};
+---
+
+<div
+  class:list={[
+    "p-6 rounded-[var(--m3-radius-xl)] transition-all",
+    variants[variant],
+    className,
+  ]}
+>
+  <slot />
+</div>

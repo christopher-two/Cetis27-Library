@@ -9,6 +9,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "apexcharts": "^5.3.6",
+    "astro": "^5.17.1",
+    "firebase": "^12.9.0"
+  },
+  "devDependencies": {
+    "@astrojs/tailwind": "^6.0.2",
+    "autoprefixer": "10",
+    "postcss": "8",
+    "tailwindcss": "3"
   }
 }

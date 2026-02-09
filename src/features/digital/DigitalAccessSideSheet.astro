@@ -1,0 +1,75 @@
+---
+import SideSheet from "../../components/ui/SideSheet.astro";
+import TextField from "../../components/ui/TextField.astro";
+import Button from "../../components/ui/Button.astro";
+---
+
+<SideSheet id="digital-access-sidesheet" title="Biblioteca Digital (Parse)">
+  <form
+    class="flex flex-col gap-8"
+    onsubmit="event.preventDefault(); alert('Acceso Digital activado exitosamente'); window.closeDigitalAccessSidesheet();"
+  >
+    <div
+      class="p-6 rounded-[var(--m3-radius-xl)] bg-[var(--m3-sys-primary-container)]/30 border border-[var(--m3-sys-primary)]/20 text-center"
+    >
+      <div
+        class="w-16 h-16 rounded-full bg-[var(--m3-sys-primary)] text-[var(--m3-sys-on-primary)] flex items-center justify-center mx-auto mb-4"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path
+            d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg
+        >
+      </div>
+      <h3 class="text-lg font-bold text-[var(--m3-sys-on-surface)]">
+        Activar Acceso Premium
+      </h3>
+      <p class="text-sm text-[var(--m3-sys-on-surface-variant)] mt-2">
+        Habilita el acceso a la biblioteca digital "Parse" para un alumno por un
+        periodo determinado.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-5">
+      <TextField
+        label="Matrícula del Alumno"
+        placeholder="Ej. 20240001"
+        required
+        id="digital-matricula"
+      />
+
+      <div class="flex flex-col gap-2">
+        <label
+          class="text-sm font-medium text-[var(--m3-sys-on-surface-variant)] ml-1"
+          >Duración del Acceso</label
+        >
+        <select
+          class="w-full px-4 py-3 rounded-[var(--m3-radius-lg)] border border-[var(--m3-sys-outline)] bg-transparent text-[var(--m3-sys-on-surface)] outline-none focus:border-[var(--m3-sys-primary)] transition-all"
+        >
+          <option value="1">1 Mes</option>
+          <option value="6" selected>6 Meses (Semestre)</option>
+          <option value="12">1 Año (Anual)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3 mt-4">
+      <Button md-type="submit" class="w-full !py-4 shadow-lg text-base"
+        >Activar Acceso</Button
+      >
+      <Button
+        variant="text"
+        onclick="window.closeDigitalAccessSidesheet()"
+        class="w-full">Cancelar</Button
+      >
+    </div>
+  </form>
+</SideSheet>

@@ -1,0 +1,102 @@
+<div id="user-activity-chart" class="w-full h-full min-h-[300px]"></div>
+
+<script>
+  import ApexCharts from "apexcharts";
+
+  const options = {
+    series: [
+      {
+        name: "Activos",
+        data: [44, 55, 41, 67, 22, 43],
+      },
+      {
+        name: "Nuevos Registros",
+        data: [13, 23, 20, 8, 13, 27],
+      },
+    ],
+    chart: {
+      type: "bar",
+      height: 350,
+      stacked: true,
+      toolbar: {
+        show: false,
+      },
+      zoom: {
+        enabled: false,
+      },
+    },
+    responsive: [
+      {
+        breakpoint: 480,
+        options: {
+          legend: {
+            position: "bottom",
+            offsetX: -10,
+            offsetY: 0,
+          },
+        },
+      },
+    ],
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 4,
+        dataLabels: {
+          total: {
+            enabled: true,
+            style: {
+              fontSize: "13px",
+              fontWeight: 900,
+            },
+          },
+        },
+      },
+    },
+    xaxis: {
+      categories: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+      labels: {
+        style: {
+          colors: "var(--m3-sys-on-surface-variant)",
+        },
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: "var(--m3-sys-on-surface-variant)",
+        },
+      },
+    },
+    legend: {
+      position: "right",
+      offsetY: 40,
+      labels: {
+        colors: "var(--m3-sys-on-surface)",
+      },
+    },
+    fill: {
+      opacity: 1,
+    },
+    colors: ["#2196F3", "#BBDEFB"],
+    grid: {
+      borderColor: "var(--m3-sys-outline-variant)",
+      strokeDashArray: 4,
+    },
+    tooltip: {
+      theme: "dark",
+    },
+  };
+
+  function renderChart() {
+    const chartElement = document.querySelector("#user-activity-chart");
+    if (chartElement) {
+      const chart = new ApexCharts(chartElement, options);
+      chart.render();
+    }
+  }
+
+  renderChart();
+  document.addEventListener("astro:page-load", renderChart);
+</script>

@@ -1,0 +1,97 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  class?: string;
+}
+
+const { id, title, class: className } = Astro.props;
+---
+
+<div
+  id={`${id}-container`}
+  class="fixed inset-0 z-[100] invisible transition-all duration-300 pointer-events-none"
+>
+  <!-- Backdrop -->
+  <div
+    id={`${id}-backdrop`}
+    class="absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-300 pointer-events-auto"
+  >
+  </div>
+
+  <!-- Sheet -->
+  <aside
+    id={id}
+    class:list={[
+      "absolute top-0 right-0 h-full w-full max-w-md bg-[var(--m3-sys-surface)] shadow-2xl transition-transform duration-300 translate-x-full pointer-events-auto flex flex-col",
+      className,
+    ]}
+  >
+    <header
+      class="p-6 flex items-center justify-between border-b border-[var(--m3-sys-outline)]/10"
+    >
+      <h2 class="text-xl font-bold text-[var(--m3-sys-on-surface)]">
+        {title}
+      </h2>
+      <button
+        id={`${id}-close`}
+        class="p-2 rounded-full hover:bg-[var(--m3-sys-surface-variant)]/50 text-[var(--m3-sys-on-surface-variant)] transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><line x1="18" y1="6" x2="6" y2="18"></line><line
+            x1="6"
+            y1="6"
+            x2="18"
+            y2="18"></line></svg
+        >
+      </button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-6">
+      <slot />
+    </div>
+  </aside>
+</div>
+
+<script is:inline define:vars={{ id }}>
+  const container = document.getElementById(`${id}-container`);
+  const backdrop = document.getElementById(`${id}-backdrop`);
+  const sheet = document.getElementById(id);
+  const closeBtn = document.getElementById(`${id}-close`);
+
+  const openSideSheet = () => {
+    container.classList.remove("invisible");
+    setTimeout(() => {
+      backdrop.classList.add("opacity-100");
+      sheet.classList.remove("translate-x-full");
+    }, 10);
+  };
+
+  const closeSideSheet = () => {
+    backdrop.classList.remove("opacity-100");
+    sheet.classList.add("translate-x-full");
+    setTimeout(() => {
+      container.classList.add("invisible");
+    }, 300);
+  };
+
+  // Normalize id to camelCase for the function name
+  const normalizedId = id.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+  const functionSuffix =
+    normalizedId.charAt(0).toUpperCase() + normalizedId.slice(1);
+
+  window[`open${functionSuffix}`] = openSideSheet;
+  window[`close${functionSuffix}`] = closeSideSheet;
+
+  closeBtn?.addEventListener("click", closeSideSheet);
+  backdrop?.addEventListener("click", closeSideSheet);
+</script>

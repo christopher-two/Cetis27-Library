@@ -1,0 +1,192 @@
+---
+import DataTable from "../../components/ui/DataTable.astro";
+
+const headers = [
+  "Alumno / Matrícula",
+  "Libro",
+  "Préstamo",
+  "Vencimiento",
+  "Estado",
+  "Acción",
+];
+---
+
+<DataTable headers={headers} id="loan-table">
+  <tbody id="loan-table-body">
+    <tr>
+      <td
+        colspan="6"
+        class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]"
+      >
+        Cargando historial...
+      </td>
+    </tr>
+  </tbody>
+</DataTable>
+
+<script>
+  import {
+    subscribeToLoans,
+    updateLoan,
+    deleteLoan,
+    type Loan,
+  } from "../../services/firebase/loans";
+
+  const tableBody = document.getElementById("loan-table-body");
+  let currentLoans: Loan[] = [];
+
+  const statusMap: Record<string, string> = {
+    active: "Activo",
+    returned: "Devuelto",
+    overdue: "Vencido",
+  };
+
+  const getStatusLabel = (status: string) => statusMap[status] || status;
+
+  const renderLoans = (loans: Loan[]) => {
+    if (!tableBody) return;
+    tableBody.innerHTML = "";
+
+    if (loans.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]">
+            No se encontraron préstamos.
+          </td>
+        </tr>
+      `;
+      // Dispatch event even if empty so filters know
+      window.dispatchEvent(new CustomEvent("loans-updated"));
+      return;
+    }
+
+    loans.forEach((loan) => {
+      const statusLabel = getStatusLabel(loan.status);
+      const row = document.createElement("tr");
+      row.className =
+        "hover:bg-[var(--m3-sys-surface-variant)]/20 transition-colors";
+      row.setAttribute("data-status", statusLabel);
+      row.setAttribute("data-date", loan.loanDate);
+      row.setAttribute(
+        "data-content",
+        `${loan.studentName} ${loan.bookTitle} ${loan.id}`.toLowerCase(),
+      );
+
+      row.innerHTML = `
+        <td class="px-6 py-4 text-sm font-medium text-[var(--m3-sys-on-surface)]">
+          ${loan.studentName}
+        </td>
+        <td class="px-6 py-4 text-sm text-[var(--m3-sys-light-on-surface-variant)]">
+          ${loan.bookTitle}
+        </td>
+        <td class="px-6 py-4 text-sm text-[var(--m3-sys-light-on-surface-variant)]">
+          ${loan.loanDate}
+        </td>
+        <td class="px-6 py-4 text-sm text-[var(--m3-sys-light-on-surface-variant)]">
+          ${loan.dueDate}
+        </td>
+        <td class="px-6 py-4 text-sm">
+          <span
+            class="px-3 py-1 rounded-full text-xs font-semibold ${
+              loan.status === "active"
+                ? "bg-[var(--m3-sys-primary-container)] text-[var(--m3-sys-on-primary-container)]"
+                : loan.status === "overdue"
+                  ? "bg-[var(--m3-sys-error-container)] text-[var(--m3-sys-on-error-container)]"
+                  : "bg-[var(--m3-sys-secondary-container)] text-[var(--m3-sys-on-secondary-container)]"
+            }"
+          >
+            ${statusLabel}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-sm">
+          <div class="flex items-center gap-2">
+            ${
+              loan.status !== "returned"
+                ? `
+              <button
+                class="text-xs !px-3 !py-1 border border-[var(--m3-sys-outline)] rounded-[var(--m3-radius-lg)] hover:bg-[var(--m3-sys-primary)] hover:text-[var(--m3-sys-on-primary)] hover:border-[var(--m3-sys-primary)] transition-colors btn-return"
+                data-id="${loan.id}"
+              >
+                Devolver
+              </button>
+            `
+                : ""
+            }
+            <button
+               class="p-2 text-[var(--m3-sys-primary)] hover:bg-[var(--m3-sys-primary)]/10 rounded-full transition-colors edit-btn"
+               data-loan='${JSON.stringify(loan).replace(/'/g, "&#39;")}'
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></svg>
+            </button>
+            <button
+              class="p-2 text-[var(--m3-sys-error)] hover:bg-[var(--m3-sys-error)]/10 rounded-full transition-colors delete-btn"
+              data-id="${loan.id}"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+            </button>
+          </div>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    // Wire up events
+    document.querySelectorAll(".btn-return").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (confirm("¿Estás seguro de marcar este libro como devuelto?")) {
+          const id = (btn as HTMLElement).dataset.id;
+          if (id) {
+            try {
+              const now = new Date().toISOString().split("T")[0];
+              await updateLoan(id, { status: "returned", returnDate: now });
+              // UI updates via subscription automatically
+            } catch (err) {
+              console.error("Error updating loan", err);
+              alert("Error al actualizar préstamo");
+            }
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll(".edit-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const loan = JSON.parse((btn as HTMLElement).dataset.loan || "{}");
+        // @ts-ignore
+        window.openEditLoanSidesheet();
+        // @ts-ignore
+        window.populateEditLoanForm(loan);
+      });
+    });
+
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = (btn as HTMLElement).dataset.id;
+        const dialog = document.getElementById(
+          "delete-loan-dialog",
+        ) as HTMLDialogElement;
+        if (dialog && id) {
+          dialog.showModal();
+          // @ts-ignore
+          window.setOnConfirmDeleteLoanDialog(async () => {
+            try {
+              await deleteLoan(id);
+            } catch (e) {
+              console.error("Error deleting loan", e);
+              alert("Error al eliminar el préstamo");
+            }
+          });
+        }
+      });
+    });
+
+    // Dispatch event to notify listeners (e.g. History page filters)
+    window.dispatchEvent(new CustomEvent("loans-updated"));
+  };
+
+  subscribeToLoans((loans) => {
+    currentLoans = loans;
+    renderLoans(loans);
+  });
+</script>

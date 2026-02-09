@@ -1,0 +1,261 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/ui/Card.astro";
+import DataTable from "../components/ui/DataTable.astro";
+import Button from "../components/ui/Button.astro";
+import Sidebar from "../components/Sidebar.astro";
+import NewStudentSideSheet from "../features/students/NewStudentSideSheet.astro";
+import EditStudentSideSheet from "../features/students/EditStudentSideSheet.astro";
+import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
+
+const headers = [
+  "Matrícula",
+  "Nombre",
+  "Carrera",
+  "Fecha Registro",
+  "Acceso Digital",
+  "Acciones",
+];
+---
+
+<Layout>
+  <div class="flex min-h-screen bg-[var(--m3-sys-light-surface)]">
+    <!-- Sidebar -->
+    <Sidebar />
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 h-screen overflow-y-auto">
+      <div class="flex flex-col gap-6 mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-[var(--m3-sys-on-surface)]">
+              Directorio de Alumnos
+            </h1>
+            <p class="text-[var(--m3-sys-on-surface-variant)] mt-1">
+              Consulta y gestiona los alumnos registrados en el sistema.
+            </p>
+          </div>
+          <Button class="shadow-md" onclick="window.openNewStudentSidesheet()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path d="M5 12h14"></path><path d="M12 5v14"></path></svg
+            >
+            Nuevo Alumno
+          </Button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="w-full max-w-sm">
+          <div class="relative">
+            <input
+              type="text"
+              id="student-search"
+              placeholder="Buscar por nombre, matrícula o carrera..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-[var(--m3-radius-xl)] bg-[var(--m3-sys-surface-variant)]/30 text-[var(--m3-sys-on-surface)] border-none outline-none focus:ring-2 focus:ring-[var(--m3-sys-primary)]/50 placeholder:text-[var(--m3-sys-on-surface-variant)]/50 transition-all"
+            />
+            <div
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--m3-sys-on-surface-variant)]"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                ><circle cx="11" cy="11" r="8"></circle><line
+                  x1="21"
+                  y1="21"
+                  x2="16.65"
+                  y2="16.65"></line></svg
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Card variant="outlined" class="!p-0 border-none">
+        <DataTable headers={headers} id="students-table">
+          <DataTable headers={headers} id="students-table">
+            <tbody id="students-table-body">
+              <!-- Dynamic Content -->
+              <tr>
+                <td
+                  colspan="6"
+                  class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]"
+                >
+                  Cargando alumnos...
+                </td>
+              </tr>
+            </tbody>
+          </DataTable>
+        </DataTable>
+      </Card>
+      <NewStudentSideSheet />
+      <EditStudentSideSheet />
+      <ConfirmDeleteDialog
+        id="delete-student-dialog"
+        title="Eliminar Alumno"
+        description="¿Estás seguro de que deseas eliminar a este alumno? Esta acción no se puede deshacer."
+      />
+    </main>
+  </div>
+
+  <script>
+    import {
+      subscribeToStudents,
+      deleteStudent,
+      type Student,
+    } from "../services/firebase/students";
+
+    const tableBody = document.getElementById("students-table-body");
+    const searchInput = document.getElementById(
+      "student-search",
+    ) as HTMLInputElement;
+    let currentStudents: Student[] = [];
+
+    const careerMap: Record<string, string> = {
+      isi: "Ingeniería en Sistemas",
+      ind: "Ingeniería Industrial",
+      admin: "Administración",
+      other: "Otro",
+    };
+
+    const getCareerName = (code: string) => careerMap[code] || code;
+
+    const formatDate = (timestamp: any) => {
+      if (!timestamp) return "";
+      // Handle Firestore Timestamp or Date object
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleDateString("es-MX");
+    };
+
+    const renderStudents = (students: Student[]) => {
+      if (!tableBody) return;
+      tableBody.innerHTML = "";
+
+      if (students.length === 0) {
+        tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]">
+            No se encontraron alumnos.
+          </td>
+        </tr>
+      `;
+        return;
+      }
+
+      students.forEach((student) => {
+        const row = document.createElement("tr");
+        row.className =
+          "hover:bg-[var(--m3-sys-surface-variant)]/20 transition-colors";
+        row.innerHTML = `
+        <td class="px-6 py-4 text-sm font-bold text-[var(--m3-sys-on-surface)]">
+          ${student.matricula}
+        </td>
+        <td class="px-6 py-4 text-sm text-[var(--m3-sys-on-surface)]">
+          ${student.name}
+        </td>
+        <td class="px-6 py-4 text-sm text-[var(--m3-sys-on-surface-variant)]">
+          ${getCareerName(student.career)}
+        </td>
+        <td class="px-6 py-4 text-sm text-[var(--m3-sys-on-surface-variant)]">
+           ${formatDate(student.createdAt)}
+        </td>
+        <td class="px-6 py-4 text-sm">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full ${
+              student.status === "active"
+                ? "bg-[var(--m3-sys-primary)]"
+                : "bg-[var(--m3-sys-outline)]"
+            }"></div>
+            <span class="text-xs font-medium uppercase opacity-70">
+              ${student.status === "active" ? "Activo" : "Inactivo"}
+            </span>
+          </div>
+        </td>
+        <td class="px-6 py-4 text-sm">
+          <div class="flex items-center gap-2">
+            <button
+              class="p-2 text-[var(--m3-sys-primary)] hover:bg-[var(--m3-sys-primary)]/10 rounded-full transition-colors edit-btn"
+              data-student='${JSON.stringify(student).replace(/'/g, "&#39;")}'
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></svg>
+            </button>
+            <button
+              class="p-2 text-[var(--m3-sys-error)] hover:bg-[var(--m3-sys-error)]/10 rounded-full transition-colors delete-btn"
+              data-id="${student.id}"
+              data-name="${student.name}"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+            </button>
+          </div>
+        </td>
+      `;
+        tableBody.appendChild(row);
+      });
+
+      document.querySelectorAll(".edit-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const student = JSON.parse(
+            (btn as HTMLElement).dataset.student || "{}",
+          );
+          // @ts-ignore
+          window.openEditStudentSidesheet();
+          // @ts-ignore
+          window.populateEditStudentForm(student);
+        });
+      });
+
+      document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = (btn as HTMLElement).dataset.id;
+          const name = (btn as HTMLElement).dataset.name;
+          const dialog = document.getElementById(
+            "delete-student-dialog",
+          ) as HTMLDialogElement;
+          if (dialog && id) {
+            dialog.showModal();
+            // @ts-ignore
+            window.setOnConfirmDeleteStudentDialog(async () => {
+              try {
+                await deleteStudent(id);
+                console.log(`Deleted student: ${name}`);
+              } catch (e) {
+                console.error("Error deleting student", e);
+                alert("Error al eliminar el alumno");
+              }
+            });
+          }
+        });
+      });
+    };
+
+    subscribeToStudents((students) => {
+      currentStudents = students;
+      renderStudents(students);
+    });
+
+    searchInput?.addEventListener("input", (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase();
+      const filtered = currentStudents.filter(
+        (student) =>
+          student.name.toLowerCase().includes(query) ||
+          student.matricula.toLowerCase().includes(query) ||
+          getCareerName(student.career).toLowerCase().includes(query),
+      );
+      renderStudents(filtered);
+    });
+  </script>
+</Layout>

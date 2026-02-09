@@ -1,0 +1,32 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"button"> {
+  variant?: "filled" | "outlined" | "text";
+}
+
+const {
+  type = "button",
+  variant = "filled",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const baseStyles =
+  "px-6 py-2.5 rounded-full font-medium transition-all duration-200 text-sm flex items-center justify-center gap-2 active:scale-95";
+const variants = {
+  filled:
+    "bg-[var(--m3-sys-primary)] text-[var(--m3-sys-on-primary)] hover:shadow-lg hover:brightness-110",
+  outlined:
+    "border border-[var(--m3-sys-outline)] text-[var(--m3-sys-on-surface)] hover:bg-[var(--m3-sys-primary)] hover:text-[var(--m3-sys-on-primary)]",
+  text: "text-[var(--m3-sys-primary)] hover:bg-[var(--m3-sys-primary)]/10",
+};
+---
+
+<button
+  type={type}
+  class:list={[baseStyles, variants[variant], className]}
+  {...rest}
+>
+  <slot />
+</button>

@@ -1,0 +1,95 @@
+---
+import SideSheet from "../../components/ui/SideSheet.astro";
+import TextField from "../../components/ui/TextField.astro";
+import Button from "../../components/ui/Button.astro";
+---
+
+<SideSheet id="add-book-sidesheet" title="Registrar Nuevo Libro">
+  class="flex flex-col gap-6" id="add-book-form" >
+  <div class="flex flex-col gap-5">
+    <TextField
+      label="Título del Libro"
+      placeholder="Ej. El Principito"
+      required
+      id="book-title"
+    />
+    <TextField
+      label="Autor"
+      placeholder="Ej. Antoine de Saint-Exupéry"
+      required
+      id="book-author"
+    />
+    <TextField
+      label="ISBN"
+      placeholder="Ej. 978-3-16-148410-0"
+      required
+      id="book-isbn"
+    />
+    <div class="grid grid-cols-2 gap-4">
+      <TextField
+        label="Copias Totales"
+        type="number"
+        placeholder="Ej. 5"
+        required
+        id="book-copies"
+      />
+      <TextField
+        label="Ubicación"
+        placeholder="Ej. Estante A-1"
+        required
+        id="book-location"
+      />
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-3 mt-4">
+    <Button md-type="submit" class="w-full !py-4 shadow-lg text-base">
+      Guardar Libro
+    </Button>
+    <Button
+      variant="text"
+      onclick="window.closeAddBookSidesheet()"
+      class="w-full">Cancelar</Button
+    >
+  </div>
+</SideSheet>
+
+<script>
+  import { addBook } from "../../services/firebase/books";
+
+  const form = document.getElementById("add-book-form");
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = (document.getElementById("book-title") as HTMLInputElement)
+      .value;
+    const author = (document.getElementById("book-author") as HTMLInputElement)
+      .value;
+    const isbn = (document.getElementById("book-isbn") as HTMLInputElement)
+      .value;
+    const copies = parseInt(
+      (document.getElementById("book-copies") as HTMLInputElement).value,
+    );
+    const location = (
+      document.getElementById("book-location") as HTMLInputElement
+    ).value;
+
+    try {
+      await addBook({
+        title,
+        author,
+        isbn,
+        copies,
+        available: copies, // Defaults to initial copies
+        location,
+      });
+      // @ts-ignore
+      window.closeAddBookSidesheet();
+      (e.target as HTMLFormElement).reset();
+    } catch (error) {
+      console.error("Error adding book:", error);
+      alert("Error al guardar el libro");
+    }
+  });
+</script>

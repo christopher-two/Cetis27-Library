@@ -1,0 +1,149 @@
+---
+import ThemeToggle from "./ui/ThemeToggle.astro";
+import Button from "./ui/Button.astro";
+
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+  { href: "/students", label: "Alumnos", icon: "users" },
+  { href: "/books", label: "Libros", icon: "books" },
+  { href: "/history", label: "Historial", icon: "history" },
+];
+
+function isActive(href: string) {
+  return currentPath === href || (href !== "/" && currentPath.startsWith(href));
+}
+---
+
+<aside
+  class="w-64 border-r border-[var(--m3-sys-outline)]/10 p-6 flex flex-col gap-8 bg-[var(--m3-sys-surface)]"
+>
+  <nav class="flex flex-col gap-1">
+    {
+      navItems.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            "flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors",
+            isActive(item.href)
+              ? "bg-[var(--m3-sys-primary-container)] text-[var(--m3-sys-on-primary-container)]"
+              : "text-[var(--m3-sys-on-surface-variant)] hover:bg-[var(--m3-sys-surface-variant)]/30",
+          ]}
+        >
+          {item.icon === "dashboard" && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+          )}
+          {item.icon === "users" && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          )}
+          {item.icon === "books" && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+          )}
+          {item.icon === "history" && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 3v5h5" />
+              <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+              <path d="M12 7v5l4 2" />
+            </svg>
+          )}
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="mt-auto flex flex-col gap-4">
+    <ThemeToggle />
+    <Button variant="text" class="w-full !justify-start !px-4" id="logout-btn">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        ><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline
+          points="16 17 21 12 16 7"></polyline><line
+          x1="21"
+          y1="12"
+          x2="9"
+          y2="12"></line></svg
+      >
+      Cerrar Sesión
+    </Button>
+  </div>
+</aside>
+
+<script>
+  import { auth } from "../lib/firebase";
+  import { signOut } from "firebase/auth";
+
+  const logoutBtn = document.getElementById("logout-btn");
+
+  logoutBtn?.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem("isAuthenticated");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  });
+</script>

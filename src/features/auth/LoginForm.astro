@@ -1,0 +1,81 @@
+---
+import Button from "../../components/ui/Button.astro";
+import TextField from "../../components/ui/TextField.astro";
+import Card from "../../components/ui/Card.astro";
+---
+
+<Card class="w-full max-w-sm" variant="elevated">
+  <div class="flex flex-col gap-6">
+    <div class="text-center">
+      <h1 class="text-2xl font-bold text-[var(--m3-sys-light-on-surface)]">
+        Bienvenido
+      </h1>
+      <p class="text-sm text-[var(--m3-sys-light-on-surface-variant)] mt-1">
+        Ingresa tus credenciales para continuar
+      </p>
+    </div>
+
+    <form class="flex flex-col gap-4" id="login-form">
+      <TextField
+        label="Correo Electrónico"
+        type="email"
+        id="email"
+        name="email"
+        placeholder="bibliotecario@ejemplo.com"
+        required
+      />
+      <TextField
+        label="Contraseña"
+        type="password"
+        id="password"
+        name="password"
+        placeholder="••••••••"
+        required
+      />
+
+      <div class="mt-2">
+        <Button md-type="submit" class="w-full"> Iniciar Sesión </Button>
+      </div>
+      <p
+        id="error-message"
+        class="text-center text-[var(--m3-sys-error)] text-sm hidden"
+      >
+      </p>
+    </form>
+
+    <div class="text-center">
+      <p class="text-xs text-[var(--m3-sys-light-on-surface-variant)]">
+        &copy; 2026 Sistema de Gestión Bibliotecaria
+      </p>
+    </div>
+  </div>
+</Card>
+
+<script>
+  import { auth } from "../../lib/firebase";
+  import { signInWithEmailAndPassword } from "firebase/auth";
+
+  const loginForm = document.getElementById("login-form");
+  const errorMessage = document.getElementById("error-message");
+
+  loginForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = (document.getElementById("email") as HTMLInputElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement)
+      .value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // Auth state listener in Layout.astro will handle redirection
+      localStorage.setItem("isAuthenticated", "true"); // Fallback/Speed
+      window.location.href = "/dashboard";
+    } catch (error: any) {
+      if (errorMessage) {
+        errorMessage.textContent =
+          "Credenciales incorrectas. Inténtalo de nuevo.";
+        errorMessage.classList.remove("hidden");
+      }
+      console.error("Login failed:", error);
+    }
+  });
+</script>
