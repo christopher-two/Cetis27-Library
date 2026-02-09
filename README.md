@@ -1,46 +1,89 @@
-# Astro Starter Kit: Basics
+# 📚 Biblioteca Digital - Cetis 27
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+Sistema integral de gestión bibliotecaria desarrollado por **Override** para el **Cetis 27**. Esta plataforma permite administrar de manera eficiente préstamos, inventario de libros y el directorio de alumnos con integración en tiempo real.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+🌐 **Website:** [biblioteca.override.com.mx](https://biblioteca.override.com.mx)
 
-## 🚀 Project Structure
+---
 
-Inside of your Astro project, you'll see the following folders and files:
+## ✨ Características Principales
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+### 📊 Panel de Control (Dashboard)
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+- **Estadísticas en Tiempo Real:** Visualización instantánea de préstamos activos, vencidos y total de libros.
+- **Gráficos Dinámicos:**
+  - Tendencia de préstamos y devoluciones (últimos 7 días).
+  - Distribución de libros por categorías.
+  - Actividad de usuarios por día de la semana.
 
-## 🧞 Commands
+### 👥 Gestión de Alumnos
 
-All commands are run from the root of the project, from a terminal:
+- Directorio completo de alumnos registrados.
+- Búsqueda avanzada por nombre, matrícula o carrera.
+- Registro y edición de información de estudiantes.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+### 📖 Inventario de Libros
 
-## 👀 Want to learn more?
+- Catálogo detallado con títulos, autores, ISBN y ubicación física.
+- Control automático de existencias (Copias totales vs. disponibles).
+- Gestión de categorías para una mejor organización.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### ⏳ Historial de Préstamos
+
+- Registro completo de todas las transacciones.
+- Filtros rápidos por estado (Activo, Devuelto, Vencido).
+- Sistema de búsqueda para localización rápida de folios.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+- **Frontend:** [Astro](https://astro.build/) (v5.0+) con componentes de UI personalizados siguiendo **Material Design 3**.
+- **Estilos:** Vanilla CSS / Tailwind (configurado).
+- **Base de Datos & Auth:** [Firebase](https://firebase.google.com/) (Firestore & Authentication).
+- **Gráficos:** [ApexCharts](https://apexcharts.com/).
+- **Despliegue:** [Cloudflare Pages](https://pages.cloudflare.com/).
+
+---
+
+## 🚀 Instalación y Desarrollo Local
+
+1.  **Clonar el repositorio:**
+
+    ```bash
+    git clone https://github.com/christopher-two/Cetis27-Library.git
+    cd Cetis27-Library
+    ```
+
+2.  **Instalar dependencias:**
+
+    ```bash
+    pnpm install
+    ```
+
+3.  **Configurar variables de entorno:**
+    Crea un archivo `.env` en la raíz con tus credenciales de Firebase:
+
+    ```env
+    PUBLIC_FIREBASE_API_KEY=xxx
+    PUBLIC_FIREBASE_AUTH_DOMAIN=xxx
+    PUBLIC_FIREBASE_PROJECT_ID=xxx
+    PUBLIC_FIREBASE_STORAGE_BUCKET=xxx
+    PUBLIC_FIREBASE_MESSAGING_SENDER_ID=xxx
+    PUBLIC_FIREBASE_APP_ID=xxx
+    PUBLIC_FIREBASE_MEASUREMENT_ID=xxx
+    ```
+
+4.  **Iniciar servidor de desarrollo:**
+    ```bash
+    pnpm dev
+    ```
+
+---
+
+## 🛡️ Desarrollado por
+
+Este proyecto es una solución a medida desarrollada por **Override**.
+
+[![Override Logo](https://www.override.com.mx/logo.png)](https://www.override.com.mx)
+[www.override.com.mx](https://www.override.com.mx)
