@@ -7,7 +7,6 @@ import DataTable from "../components/ui/DataTable.astro";
 import AddBookSideSheet from "../features/books/AddBookSideSheet.astro";
 import EditBookSideSheet from "../features/books/EditBookSideSheet.astro";
 import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
-import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
 
 const headers = [
   "Título",
@@ -20,7 +19,10 @@ const headers = [
 ];
 ---
 
-<Layout>
+<Layout
+  title="Catálogo de Libros | Biblioteca Digital"
+  description="Explora y gestiona el catálogo de libros disponibles en la biblioteca."
+>
   <div class="flex min-h-screen bg-[var(--m3-sys-light-surface)]">
     <!-- Sidebar -->
     <Sidebar />

@@ -3,10 +3,48 @@ import Layout from "../layouts/Layout.astro";
 import LoginForm from "../features/auth/LoginForm.astro";
 ---
 
-<Layout>
+<Layout
+  title="Iniciar Sesión | Biblioteca Digital"
+  description="Accede al sistema de gestión de biblioteca digital."
+>
   <main
-    class="min-h-screen flex items-center justify-center p-4 bg-[var(--m3-sys-light-surface)]"
+    class="min-h-screen flex flex-col items-center justify-center p-4 bg-[var(--m3-sys-light-surface)]"
   >
-    <LoginForm />
+    <div class="w-full max-w-md flex flex-col gap-8">
+      <LoginForm />
+
+      <div class="text-center animate-fade-in">
+        <p
+          class="text-[10px] text-[var(--m3-sys-on-surface-variant)] opacity-50 uppercase tracking-widest mb-1"
+        >
+          Plataforma desarrollada por
+        </p>
+        <a
+          href="https://www.override.com.mx"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-sm font-bold text-[var(--m3-sys-primary)] hover:underline flex items-center justify-center gap-1.5 transition-all hover:scale-105"
+        >
+          Override
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+            ></path><polyline points="15 3 21 3 21 9"></polyline><line
+              x1="10"
+              y1="14"
+              x2="21"
+              y2="3"></line></svg
+          >
+        </a>
+      </div>
+    </div>
   </main>
 </Layout>

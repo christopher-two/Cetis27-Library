@@ -2,7 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout>
+<Layout
+  title="Cargando... | Biblioteca Digital"
+  description="Redireccionando al sistema de gestión de biblioteca."
+>
   <script>
     const isAuth = localStorage.getItem("isAuthenticated") === "true";
     window.location.href = isAuth ? "/dashboard" : "/login";
