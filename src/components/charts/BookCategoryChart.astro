@@ -7,9 +7,11 @@
 <script>
   import ApexCharts from "apexcharts";
 
+  let chart: ApexCharts | null = null;
+
   const options = {
-    series: [44, 55, 13, 33],
-    labels: ["Ingeniería", "Literatura", "Ciencias", "Historia"],
+    series: [], // Initial empty state
+    labels: [],
     chart: {
       width: 380,
       type: "donut",
@@ -51,20 +53,49 @@
         colors: "var(--m3-sys-on-surface)",
       },
     },
-    colors: ["#1565C0", "#42A5F5", "#90CAF9", "#1E88E5"],
+    colors: ["#1565C0", "#42A5F5", "#90CAF9", "#1E88E5", "#0D47A1", "#64B5F6"], // Expanded palette
     tooltip: {
       theme: "dark",
+    },
+    noData: {
+      text: "Cargando datos...",
+      align: "center",
+      verticalAlign: "middle",
+      style: {
+        color: "var(--m3-sys-on-surface)",
+        fontSize: "16px",
+      },
     },
   };
 
   function renderChart() {
     const chartElement = document.querySelector("#book-category-chart");
-    if (chartElement) {
-      const chart = new ApexCharts(chartElement, options);
+    if (chartElement && !chart) {
+      chart = new ApexCharts(chartElement, options);
       chart.render();
     }
   }
 
+  function updateChart(event: CustomEvent) {
+    if (!chart) return;
+    const categoriesData = event.detail;
+    const labels = Object.keys(categoriesData);
+    const series = Object.values(categoriesData) as number[];
+
+    chart.updateOptions({
+      labels: labels,
+      series: series,
+    });
+  }
+
   renderChart();
-  document.addEventListener("astro:page-load", renderChart);
+  document.addEventListener("astro:page-load", () => {
+    chart = null; // Reset chart instance on page load
+    renderChart();
+  });
+
+  window.addEventListener(
+    "dashboard-books-updated",
+    updateChart as EventListener,
+  );
 </script>

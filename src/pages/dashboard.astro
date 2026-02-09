@@ -80,11 +80,14 @@ import ThemeToggle from "../components/ui/ThemeToggle.astro";
             class="text-[var(--m3-sys-on-surface-variant)] text-sm font-medium"
             >Préstamos Activos</span
           >
-          <span class="text-4xl font-normal text-[var(--m3-sys-primary)]"
-            >12</span
+          <span
+            id="stats-active-loans"
+            class="text-4xl font-normal text-[var(--m3-sys-primary)]">--</span
           >
-          <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
-            >2 vencen hoy</span
+          <span
+            id="stats-active-loans-desc"
+            class="text-xs text-[var(--m3-sys-on-surface-variant)]"
+            >Cargando...</span
           >
         </Card>
         <Card class="flex flex-col gap-2">
@@ -92,7 +95,10 @@ import ThemeToggle from "../components/ui/ThemeToggle.astro";
             class="text-[var(--m3-sys-on-surface-variant)] text-sm font-medium"
             >Préstamos Vencidos</span
           >
-          <span class="text-4xl font-normal text-[var(--m3-sys-error)]">5</span>
+          <span
+            id="stats-overdue-loans"
+            class="text-4xl font-normal text-[var(--m3-sys-error)]">--</span
+          >
           <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
             >Requieren atención</span
           >
@@ -102,11 +108,14 @@ import ThemeToggle from "../components/ui/ThemeToggle.astro";
             class="text-[var(--m3-sys-on-surface-variant)] text-sm font-medium"
             >Total Libros</span
           >
-          <span class="text-4xl font-normal text-[var(--m3-sys-tertiary)]"
-            >1,240</span
+          <span
+            id="stats-total-books"
+            class="text-4xl font-normal text-[var(--m3-sys-tertiary)]">--</span
           >
-          <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
-            >85% disponibles</span
+          <span
+            id="stats-total-books-desc"
+            class="text-xs text-[var(--m3-sys-on-surface-variant)]"
+            >Cargando...</span
           >
         </Card>
       </div>
@@ -260,6 +269,9 @@ import ThemeToggle from "../components/ui/ThemeToggle.astro";
 </Layout>
 
 <script>
+  import { subscribeToLoans, type Loan } from "../services/firebase/loans";
+  import { subscribeToBooks, type Book } from "../services/firebase/books";
+
   function setupDashboardActions() {
     // Helper to add click listeners safely
     const addListener = (id: string, handler: () => void) => {
@@ -287,7 +299,78 @@ import ThemeToggle from "../components/ui/ThemeToggle.astro";
     addListener("btn-digital-access-header", openDigital);
   }
 
+  function setupDashboardData() {
+    const activeLoansEl = document.getElementById("stats-active-loans");
+    const activeLoansDescEl = document.getElementById(
+      "stats-active-loans-desc",
+    );
+    const overdueLoansEl = document.getElementById("stats-overdue-loans");
+    const totalBooksEl = document.getElementById("stats-total-books");
+    const totalBooksDescEl = document.getElementById("stats-total-books-desc");
+
+    // Subscribe to Loans
+    subscribeToLoans((loans: Loan[]) => {
+      const activeLoans = loans.filter((l) => l.status === "active");
+      const overdueLoans = loans.filter((l) => l.status === "overdue");
+      const returnedLoans = loans.filter((l) => l.status === "returned");
+
+      // Update Stats
+      if (activeLoansEl)
+        activeLoansEl.innerText = activeLoans.length.toString();
+      if (overdueLoansEl)
+        overdueLoansEl.innerText = overdueLoans.length.toString();
+
+      const today = new Date().toISOString().split("T")[0];
+      const dueToday = activeLoans.filter((l) => l.dueDate === today).length;
+      if (activeLoansDescEl)
+        activeLoansDescEl.innerText = `${dueToday} vencen hoy`;
+
+      // Dispatch Data for Charts
+      const trendsData = {
+        loans: loans, // Pass all loans, chart will process dates
+      };
+
+      const activityData = {
+        loans: loans,
+      };
+
+      window.dispatchEvent(
+        new CustomEvent("dashboard-loans-updated", {
+          detail: { trends: trendsData, activity: activityData },
+        }),
+      );
+    });
+
+    // Subscribe to Books
+    subscribeToBooks((books: Book[]) => {
+      const total = books.length;
+      const available = books.filter((b) => b.available > 0).length; // Assuming available property, check Book type later if needed
+      const percentage = total > 0 ? Math.round((available / total) * 100) : 0;
+
+      if (totalBooksEl) totalBooksEl.innerText = total.toString();
+      if (totalBooksDescEl)
+        totalBooksDescEl.innerText = `${percentage}% disponibles (aprox)`; // Logic needed for real availability calculation if copies tracked
+
+      const categoriesData = books.reduce(
+        (acc, book) => {
+          const cat = book.category || "Sin Categoría";
+          acc[cat] = (acc[cat] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      window.dispatchEvent(
+        new CustomEvent("dashboard-books-updated", { detail: categoriesData }),
+      );
+    });
+  }
+
   // Run on load and View Transitions
   setupDashboardActions();
-  document.addEventListener("astro:page-load", setupDashboardActions);
+  setupDashboardData();
+  document.addEventListener("astro:page-load", () => {
+    setupDashboardActions();
+    setupDashboardData();
+  });
 </script>

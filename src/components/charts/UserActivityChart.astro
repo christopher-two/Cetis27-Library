@@ -3,17 +3,10 @@
 <script>
   import ApexCharts from "apexcharts";
 
+  let chart: ApexCharts | null = null;
+
   const options = {
-    series: [
-      {
-        name: "Activos",
-        data: [44, 55, 41, 67, 22, 43],
-      },
-      {
-        name: "Nuevos Registros",
-        data: [13, 23, 20, 8, 13, 27],
-      },
-    ],
+    series: [], // Initial empty state
     chart: {
       type: "bar",
       height: 350,
@@ -53,7 +46,7 @@
       },
     },
     xaxis: {
-      categories: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+      categories: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
       labels: {
         style: {
           colors: "var(--m3-sys-on-surface-variant)",
@@ -87,16 +80,100 @@
     tooltip: {
       theme: "dark",
     },
+    noData: {
+      text: "Cargando datos...",
+      align: "center",
+      verticalAlign: "middle",
+      style: {
+        color: "var(--m3-sys-on-surface)",
+        fontSize: "16px",
+      },
+    },
   };
 
   function renderChart() {
     const chartElement = document.querySelector("#user-activity-chart");
-    if (chartElement) {
-      const chart = new ApexCharts(chartElement, options);
+    if (chartElement && !chart) {
+      chart = new ApexCharts(chartElement, options);
       chart.render();
     }
   }
 
+  function updateChart(event: CustomEvent) {
+    if (!chart) return;
+
+    const { loans } = event.detail.activity;
+    if (!loans) return;
+
+    // Initialize days array (0=Sunday to 6=Saturday) but usually we want Mon-Sun
+    // Lets stick to what categories says: Lun-Dom (0-6 index)
+    // JS getDay() returns 0 for Sunday.
+    const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    // But chart categories are: Lun, Mar, Mié... Dom (7 items)
+    // So let's map JS day 1->0, 2->1 ... 0->6
+
+    const getDayIndex = (dateStr: string) => {
+      const day = new Date(dateStr).getDay(); // 0 is Sunday
+      return day === 0 ? 6 : day - 1;
+    };
+
+    const activeCounts = [0, 0, 0, 0, 0, 0, 0];
+    const newCounts = [0, 0, 0, 0, 0, 0, 0];
+
+    loans.forEach((loan: any) => {
+      // New loans based on loanDate
+      if (loan.loanDate) {
+        const idx = getDayIndex(loan.loanDate);
+        if (idx >= 0 && idx <= 6) newCounts[idx]++;
+      }
+      // Active items (this logic is a bit fuzzy for "Activity", usually implies checkouts/checkins)
+      // Let's count checkins as "Activos" (or completed activity) or just use current active loans distribution
+      // For "Actividad", let's say "Préstamos" vs "Devoluciones" per day of week
+
+      if (loan.returnDate) {
+        const idx = getDayIndex(loan.loanDate); // Use return date if available?
+        // logic in dashboard was: Activos vs Nuevos.
+        // Let's stick to "Returned" vs "New" for activity
+      }
+    });
+
+    // Recalculating simplification:
+    // Series 1: "Préstamos" (New)
+    // Series 2: "Devoluciones" (Returned)
+
+    const loanCounts = [0, 0, 0, 0, 0, 0, 0];
+    const returnCounts = [0, 0, 0, 0, 0, 0, 0];
+
+    loans.forEach((loan: any) => {
+      if (loan.loanDate) {
+        const idx = getDayIndex(loan.loanDate);
+        if (idx >= 0) loanCounts[idx]++;
+      }
+      if (loan.returnDate && loan.status === "returned") {
+        const idx = getDayIndex(loan.returnDate);
+        if (idx >= 0) returnCounts[idx]++;
+      }
+    });
+
+    chart.updateSeries([
+      {
+        name: "Préstamos",
+        data: loanCounts,
+      },
+      {
+        name: "Devoluciones",
+        data: returnCounts,
+      },
+    ]);
+  }
+
   renderChart();
-  document.addEventListener("astro:page-load", renderChart);
+  document.addEventListener("astro:page-load", () => {
+    chart = null;
+    renderChart();
+  });
+  window.addEventListener(
+    "dashboard-loans-updated",
+    updateChart as EventListener,
+  );
 </script>

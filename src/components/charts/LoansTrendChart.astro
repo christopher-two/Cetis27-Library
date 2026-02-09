@@ -3,17 +3,10 @@
 <script>
   import ApexCharts from "apexcharts";
 
+  let chart: ApexCharts | null = null;
+
   const options = {
-    series: [
-      {
-        name: "Préstamos",
-        data: [31, 40, 28, 51, 42, 109, 100],
-      },
-      {
-        name: "Devoluciones",
-        data: [11, 32, 45, 32, 34, 52, 41],
-      },
-    ],
+    series: [],
     chart: {
       height: 350,
       type: "area",
@@ -34,15 +27,6 @@
     },
     xaxis: {
       type: "datetime",
-      categories: [
-        "2018-09-19T00:00:00.000Z",
-        "2018-09-19T01:30:00.000Z",
-        "2018-09-19T02:30:00.000Z",
-        "2018-09-19T03:30:00.000Z",
-        "2018-09-19T04:30:00.000Z",
-        "2018-09-19T05:30:00.000Z",
-        "2018-09-19T06:30:00.000Z",
-      ],
       labels: {
         style: {
           colors: "var(--m3-sys-on-surface-variant)",
@@ -72,9 +56,9 @@
       },
     },
     tooltip: {
-      theme: "dark", // Or custom CSS based on theme
+      theme: "dark",
       x: {
-        format: "dd/MM/yy HH:mm",
+        format: "dd MMM yyyy",
       },
     },
     colors: ["#64B5F6", "#1976D2"],
@@ -92,16 +76,69 @@
         colors: "var(--m3-sys-on-surface)",
       },
     },
+    noData: {
+      text: "Cargando datos...",
+      align: "center",
+      verticalAlign: "middle",
+      style: {
+        color: "var(--m3-sys-on-surface)",
+        fontSize: "16px",
+      },
+    },
   };
 
   function renderChart() {
     const chartElement = document.querySelector("#loans-trend-chart");
-    if (chartElement) {
-      const chart = new ApexCharts(chartElement, options);
+    if (chartElement && !chart) {
+      chart = new ApexCharts(chartElement, options);
       chart.render();
     }
   }
 
+  function updateChart(event: CustomEvent) {
+    if (!chart) return;
+
+    const { loans } = event.detail.trends;
+    if (!loans) return;
+
+    // Process loans to get counts by date (last 7 days example)
+    const last7Days = [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return d.toISOString().split("T")[0];
+    });
+
+    const loanedData = last7Days.map((date) => ({
+      x: date,
+      y: loans.filter((l: any) => l.loanDate === date).length,
+    }));
+
+    const returnedData = last7Days.map((date) => ({
+      x: date,
+      y: loans.filter(
+        (l: any) => l.returnDate === date && l.status === "returned",
+      ).length,
+    }));
+
+    chart.updateSeries([
+      {
+        name: "Préstamos",
+        data: loanedData,
+      },
+      {
+        name: "Devoluciones",
+        data: returnedData,
+      },
+    ]);
+  }
+
   renderChart();
-  document.addEventListener("astro:page-load", renderChart);
+  document.addEventListener("astro:page-load", () => {
+    chart = null;
+    renderChart();
+  });
+  window.addEventListener(
+    "dashboard-loans-updated",
+    updateChart as EventListener,
+  );
 </script>

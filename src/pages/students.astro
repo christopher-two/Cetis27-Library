@@ -87,19 +87,17 @@ const headers = [
 
       <Card variant="outlined" class="!p-0 border-none">
         <DataTable headers={headers} id="students-table">
-          <DataTable headers={headers} id="students-table">
-            <tbody id="students-table-body">
-              <!-- Dynamic Content -->
-              <tr>
-                <td
-                  colspan="6"
-                  class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]"
-                >
-                  Cargando alumnos...
-                </td>
-              </tr>
-            </tbody>
-          </DataTable>
+          <tbody id="students-table-body">
+            <!-- Dynamic Content -->
+            <tr>
+              <td
+                colspan="6"
+                class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]"
+              >
+                Cargando alumnos...
+              </td>
+            </tr>
+          </tbody>
         </DataTable>
       </Card>
       <NewStudentSideSheet />

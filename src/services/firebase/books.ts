@@ -19,6 +19,7 @@ export interface Book {
   copies: number;
   available: number;
   location: string;
+  category?: string;
   cover?: string;
   createdAt?: Timestamp;
 }
