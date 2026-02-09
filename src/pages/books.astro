@@ -7,6 +7,7 @@ import DataTable from "../components/ui/DataTable.astro";
 import AddBookSideSheet from "../features/books/AddBookSideSheet.astro";
 import EditBookSideSheet from "../features/books/EditBookSideSheet.astro";
 import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
+import Skeleton from "../components/ui/Skeleton.astro";
 
 const headers = [
   "Título",
@@ -92,15 +93,39 @@ const headers = [
       <Card variant="outlined" class="!p-0 border-none">
         <DataTable headers={headers} id="books-table">
           <tbody id="books-table-body">
-            <!-- Dynamic Content -->
-            <tr>
-              <td
-                colspan="7"
-                class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]"
-              >
-                Cargando libros...
-              </td>
-            </tr>
+            <!-- Dynamic Content (Skeletons) -->
+            {
+              [...Array(5)].map(() => (
+                <tr>
+                  <td class="px-6 py-4">
+                    <Skeleton width="140px" height="20px" />
+                  </td>
+                  <td class="px-6 py-4">
+                    <Skeleton width="100px" height="16px" />
+                  </td>
+                  <td class="px-6 py-4">
+                    <Skeleton width="80px" height="16px" />
+                  </td>
+                  <td class="px-6 py-4">
+                    <Skeleton width="90px" height="16px" />
+                  </td>
+                  <td class="px-6 py-4">
+                    <Skeleton width="60px" height="24px" rounded="full" />
+                  </td>
+                  <td class="px-6 py-4">
+                    <Skeleton width="40px" height="16px" />
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                      <>
+                        <Skeleton width="32px" height="32px" rounded="full" />
+                        <Skeleton width="32px" height="32px" rounded="full" />
+                      </>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            }
           </tbody>
         </DataTable>
       </Card>

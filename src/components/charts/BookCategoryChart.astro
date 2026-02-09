@@ -1,7 +1,14 @@
+---
+import Skeleton from "../ui/Skeleton.astro";
+---
+
 <div
   id="book-category-chart"
   class="w-full h-full min-h-[300px] flex items-center justify-center"
 >
+  <div id="book-category-loading" class="flex items-center justify-center p-8">
+    <Skeleton width="200px" height="200px" rounded="full" />
+  </div>
 </div>
 
 <script>
@@ -58,7 +65,7 @@
       theme: "dark",
     },
     noData: {
-      text: "Cargando datos...",
+      text: " ",
       align: "center",
       verticalAlign: "middle",
       style: {
@@ -78,6 +85,10 @@
 
   function updateChart(event: CustomEvent) {
     if (!chart) return;
+
+    const loadingEl = document.getElementById("book-category-loading");
+    if (loadingEl) loadingEl.style.display = "none";
+
     const categoriesData = event.detail;
     const labels = Object.keys(categoriesData);
     const series = Object.values(categoriesData) as number[];

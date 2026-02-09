@@ -11,6 +11,7 @@ import Card from "../components/ui/Card.astro";
 import Button from "../components/ui/Button.astro";
 import Sidebar from "../components/Sidebar.astro";
 import ThemeToggle from "../components/ui/ThemeToggle.astro";
+import Skeleton from "../components/ui/Skeleton.astro";
 ---
 
 <Layout
@@ -89,8 +90,8 @@ import ThemeToggle from "../components/ui/ThemeToggle.astro";
           >
           <span
             id="stats-active-loans-desc"
-            class="text-xs text-[var(--m3-sys-on-surface-variant)]"
-            >Cargando...</span
+            class="text-xs text-[var(--m3-sys-on-surface-variant)] flex items-center gap-1"
+            ><Skeleton width="60px" height="12px" /> hoy</span
           >
         </Card>
         <Card class="flex flex-col gap-2">
@@ -117,8 +118,8 @@ import ThemeToggle from "../components/ui/ThemeToggle.astro";
           >
           <span
             id="stats-total-books-desc"
-            class="text-xs text-[var(--m3-sys-on-surface-variant)]"
-            >Cargando...</span
+            class="text-xs text-[var(--m3-sys-on-surface-variant)] flex items-center gap-1"
+            ><Skeleton width="80px" height="12px" /> disponiblidad</span
           >
         </Card>
       </div>

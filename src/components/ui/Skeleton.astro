@@ -1,0 +1,33 @@
+---
+interface Props {
+  class?: string;
+  width?: string;
+  height?: string;
+  rounded?: "sm" | "md" | "lg" | "xl" | "full";
+}
+
+const {
+  class: className = "",
+  width = "100%",
+  height = "1rem",
+  rounded = "md",
+} = Astro.props;
+
+const radiusMap = {
+  sm: "var(--m3-radius-sm, 4px)",
+  md: "var(--m3-radius-md)",
+  lg: "var(--m3-radius-lg)",
+  xl: "var(--m3-radius-xl)",
+  full: "9999px",
+};
+---
+
+<div
+  class={`shimmer ${className}`}
+  style={{
+    width,
+    height,
+    borderRadius: radiusMap[rounded],
+  }}
+>
+</div>

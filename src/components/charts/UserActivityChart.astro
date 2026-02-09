@@ -1,4 +1,29 @@
-<div id="user-activity-chart" class="w-full h-full min-h-[300px]"></div>
+---
+import Skeleton from "../ui/Skeleton.astro";
+---
+
+<div id="user-activity-chart" class="w-full h-full min-h-[300px]">
+  <div id="user-activity-loading" class="w-full h-full flex flex-col gap-4 p-4">
+    <div class="flex items-end gap-2 h-[200px] w-full">
+      <Skeleton width="12%" height="60%" />
+      <Skeleton width="12%" height="40%" />
+      <Skeleton width="12%" height="80%" />
+      <Skeleton width="12%" height="50%" />
+      <Skeleton width="12%" height="70%" />
+      <Skeleton width="12%" height="90%" />
+      <Skeleton width="12%" height="45%" />
+    </div>
+    <div class="flex justify-between w-full">
+      <Skeleton width="10%" height="12px" />
+      <Skeleton width="10%" height="12px" />
+      <Skeleton width="10%" height="12px" />
+      <Skeleton width="10%" height="12px" />
+      <Skeleton width="10%" height="12px" />
+      <Skeleton width="10%" height="12px" />
+      <Skeleton width="10%" height="12px" />
+    </div>
+  </div>
+</div>
 
 <script>
   import ApexCharts from "apexcharts";
@@ -81,7 +106,7 @@
       theme: "dark",
     },
     noData: {
-      text: "Cargando datos...",
+      text: " ",
       align: "center",
       verticalAlign: "middle",
       style: {
@@ -101,6 +126,9 @@
 
   function updateChart(event: CustomEvent) {
     if (!chart) return;
+
+    const loadingEl = document.getElementById("user-activity-loading");
+    if (loadingEl) loadingEl.style.display = "none";
 
     const { loans } = event.detail.activity;
     if (!loans) return;

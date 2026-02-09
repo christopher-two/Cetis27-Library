@@ -2,8 +2,6 @@
 
 Sistema integral de gestión bibliotecaria desarrollado por **Override** para el **Cetis 27**. Esta plataforma permite administrar de manera eficiente préstamos, inventario de libros y el directorio de alumnos con integración en tiempo real.
 
-🌐 **Website:** [biblioteca.override.com.mx](https://biblioteca.override.com.mx)
-
 ---
 
 ## ✨ Características Principales

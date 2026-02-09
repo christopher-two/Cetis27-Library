@@ -1,5 +1,6 @@
 ---
 import DataTable from "../../components/ui/DataTable.astro";
+import Skeleton from "../../components/ui/Skeleton.astro";
 
 const headers = [
   "Alumno / Matrícula",
@@ -13,14 +14,37 @@ const headers = [
 
 <DataTable headers={headers} id="loan-table">
   <tbody id="loan-table-body">
-    <tr>
-      <td
-        colspan="6"
-        class="text-center py-8 text-[var(--m3-sys-on-surface-variant)]"
-      >
-        Cargando historial...
-      </td>
-    </tr>
+    <!-- Dynamic Content (Skeletons) -->
+    {
+      [...Array(5)].map(() => (
+        <tr>
+          <td class="px-6 py-4">
+            <Skeleton width="120px" height="20px" />
+          </td>
+          <td class="px-6 py-4">
+            <Skeleton width="150px" height="16px" />
+          </td>
+          <td class="px-6 py-4">
+            <Skeleton width="80px" height="16px" />
+          </td>
+          <td class="px-6 py-4">
+            <Skeleton width="80px" height="16px" />
+          </td>
+          <td class="px-6 py-4">
+            <Skeleton width="70px" height="24px" rounded="full" />
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex gap-2">
+              <>
+                <Skeleton width="60px" height="28px" rounded="lg" />
+                <Skeleton width="32px" height="32px" rounded="full" />
+                <Skeleton width="32px" height="32px" rounded="full" />
+              </>
+            </div>
+          </td>
+        </tr>
+      ))
+    }
   </tbody>
 </DataTable>
 

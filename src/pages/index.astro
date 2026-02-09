@@ -1,11 +1,19 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Skeleton from "../components/ui/Skeleton.astro";
 ---
 
 <Layout
   title="Cargando... | Biblioteca Digital"
   description="Redireccionando al sistema de gestión de biblioteca."
 >
+  <main
+    class="min-h-screen flex flex-col items-center justify-center gap-4 bg-[var(--m3-sys-surface)]"
+  >
+    <Skeleton width="64px" height="64px" rounded="full" />
+    <Skeleton width="180px" height="20px" rounded="full" />
+  </main>
+
   <script>
     const isAuth = localStorage.getItem("isAuthenticated") === "true";
     window.location.href = isAuth ? "/dashboard" : "/login";
