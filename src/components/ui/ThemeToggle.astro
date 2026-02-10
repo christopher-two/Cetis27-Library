@@ -1,10 +1,17 @@
 ---
+interface Props {
+  minimal?: boolean;
+}
 
+const { minimal = false } = Astro.props;
 ---
 
 <button
   id="theme-toggle"
-  class="w-full flex items-center justify-center p-3 rounded-2xl text-[var(--m3-sys-on-surface-variant)] hover:bg-[var(--m3-sys-surface-variant)]/30 transition-all active:scale-95 group"
+  class:list={[
+    "flex items-center justify-center rounded-2xl text-[var(--m3-sys-on-surface-variant)] hover:bg-[var(--m3-sys-surface-variant)]/30 transition-all active:scale-95 group",
+    minimal ? "p-2 w-10 h-10" : "p-3 w-full",
+  ]}
   aria-label="Toggle theme"
 >
   <div class="relative w-6 h-6">
