@@ -69,12 +69,12 @@ const canonicalURL = new URL(
         document.documentElement.setAttribute("data-theme", "dark");
         document.documentElement.classList.add("dark");
       }
+    </script>
 
-      // Route Protection Logic
+    <script>
       import { auth } from "../lib/firebase";
       import { onAuthStateChanged } from "firebase/auth";
 
-      // Route Protection Logic
       const currentPath = window.location.pathname;
 
       onAuthStateChanged(auth, (user) => {

@@ -7,17 +7,15 @@ const { minimal = false } = Astro.props;
 ---
 
 <button
-  id="theme-toggle"
   class:list={[
-    "flex items-center justify-center rounded-2xl text-[var(--m3-sys-on-surface-variant)] hover:bg-[var(--m3-sys-surface-variant)]/30 transition-all active:scale-95 group",
+    "theme-toggle-btn flex items-center justify-center rounded-2xl text-[var(--m3-sys-on-surface-variant)] hover:bg-[var(--m3-sys-surface-variant)]/30 transition-all active:scale-95 group",
     minimal ? "p-2 w-10 h-10" : "p-3 w-full",
   ]}
   aria-label="Toggle theme"
 >
   <div class="relative w-6 h-6">
     <svg
-      id="sun-icon"
-      class="hidden dark:block absolute inset-0 transition-transform duration-500 rotate-90 dark:rotate-0"
+      class="hidden dark:block absolute inset-0 transition-transform duration-500 rotate-90 dark:rotate-0 sun-icon"
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
@@ -44,8 +42,7 @@ const { minimal = false } = Astro.props;
       ></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg
     >
     <svg
-      id="moon-icon"
-      class="block dark:hidden absolute inset-0 transition-transform duration-500 rotate-0 dark:-rotate-90"
+      class="block dark:hidden absolute inset-0 transition-transform duration-500 rotate-0 dark:-rotate-90 moon-icon"
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
@@ -61,37 +58,30 @@ const { minimal = false } = Astro.props;
 </button>
 
 <script>
-  const theme = (() => {
-    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
-      return localStorage.getItem("theme") || "light";
-    }
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark";
-    }
-    return "light";
-  })();
-
-  if (theme === "light") {
-    document.documentElement.setAttribute("data-theme", "light");
-    document.documentElement.classList.remove("dark");
-  } else {
-    document.documentElement.setAttribute("data-theme", "dark");
-    document.documentElement.classList.add("dark");
-  }
-
-  window.localStorage.setItem("theme", theme);
-
   const handleToggleClick = () => {
     const element = document.documentElement;
     const isDark = element.classList.contains("dark");
     const nextTheme = isDark ? "light" : "dark";
 
     element.setAttribute("data-theme", nextTheme);
-    element.classList.toggle("dark");
+    if (nextTheme === "dark") {
+      element.classList.add("dark");
+    } else {
+      element.classList.remove("dark");
+    }
     localStorage.setItem("theme", nextTheme);
   };
 
-  document
-    .getElementById("theme-toggle")
-    ?.addEventListener("click", handleToggleClick);
+  const setupThemeToggles = () => {
+    document.querySelectorAll(".theme-toggle-btn").forEach((btn) => {
+      btn.removeEventListener("click", handleToggleClick);
+      btn.addEventListener("click", handleToggleClick);
+    });
+  };
+
+  // Initial setup
+  setupThemeToggles();
+
+  // Re-setup on page load (for View Transitions)
+  document.addEventListener("astro:page-load", setupThemeToggles);
 </script>
