@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Card from "../components/ui/Card.astro";
 import Button from "../components/ui/Button.astro";
 import Sidebar from "../components/Sidebar.astro";
+import MobileHeader from "../components/MobileHeader.astro";
 import DataTable from "../components/ui/DataTable.astro";
 import AddBookSideSheet from "../features/books/AddBookSideSheet.astro";
 import EditBookSideSheet from "../features/books/EditBookSideSheet.astro";
@@ -24,23 +25,35 @@ const headers = [
   title="Catálogo de Libros | Biblioteca Digital"
   description="Explora y gestiona el catálogo de libros disponibles en la biblioteca."
 >
-  <div class="flex min-h-screen bg-[var(--m3-sys-light-surface)]">
+  <div
+    class="flex flex-col lg:flex-row min-h-screen bg-[var(--m3-sys-light-surface)]"
+  >
+    <!-- Mobile Header -->
+    <MobileHeader />
+
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Main Content -->
-    <main class="flex-1 p-8 h-screen overflow-y-auto">
+    <main class="flex-1 p-4 lg:p-8 h-auto lg:h-screen overflow-y-auto">
       <div class="flex flex-col gap-6 mb-8">
-        <div class="flex items-center justify-between">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
           <div class="flex flex-col gap-1">
-            <h1 class="text-3xl font-normal text-[var(--m3-sys-on-surface)]">
+            <h1
+              class="text-2xl lg:text-3xl font-normal text-[var(--m3-sys-on-surface)]"
+            >
               Catalogo de Libros
             </h1>
             <p class="text-[var(--m3-sys-on-surface-variant)] text-sm">
               Administra el inventario de la biblioteca física
             </p>
           </div>
-          <Button class="shadow-md" onclick="window.openAddBookSidesheet()">
+          <Button
+            class="shadow-md w-full sm:w-auto"
+            onclick="window.openAddBookSidesheet()"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"

@@ -1,0 +1,70 @@
+---
+import ThemeToggle from "./ui/ThemeToggle.astro";
+---
+
+<header
+  class="lg:hidden flex items-center justify-between px-6 py-4 border-b border-[var(--m3-sys-outline)]/10 bg-[var(--m3-sys-surface)] sticky top-0 z-40"
+>
+  <div class="flex items-center gap-4">
+    <button
+      id="mobile-menu-toggle"
+      class="p-2 rounded-full hover:bg-[var(--m3-sys-surface-variant)]/50 text-[var(--m3-sys-on-surface)] transition-colors"
+      aria-label="Menu"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="4" y1="18" x2="20" y2="18"></line>
+      </svg>
+    </button>
+    <div class="flex items-center gap-2">
+      <img src="/favicon.svg" alt="Logo" class="w-6 h-6" />
+      <span class="font-bold text-lg text-[var(--m3-sys-on-surface)]"
+        >Biblioteca</span
+      >
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <ThemeToggle />
+  </div>
+</header>
+
+<script>
+  function setupMobileMenu() {
+    const toggle = document.getElementById("mobile-menu-toggle");
+    const sidebar = document.getElementById("main-sidebar");
+    const backdrop = document.getElementById("sidebar-backdrop");
+
+    const openMenu = () => {
+      sidebar?.classList.remove("-translate-x-full");
+      backdrop?.classList.remove("hidden");
+      setTimeout(() => backdrop?.classList.remove("opacity-0"), 10);
+    };
+
+    const closeMenu = () => {
+      sidebar?.classList.add("-translate-x-full");
+      backdrop?.classList.add("opacity-0");
+      setTimeout(() => backdrop?.classList.add("hidden"), 300);
+    };
+
+    toggle?.addEventListener("click", openMenu);
+    backdrop?.addEventListener("click", closeMenu);
+
+    // Close on navigation (for SPA-like behavior if using Astro View Transitions)
+    document.addEventListener("astro:after-navigation", closeMenu);
+  }
+
+  setupMobileMenu();
+  document.addEventListener("astro:page-load", setupMobileMenu);
+</script>

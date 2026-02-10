@@ -16,9 +16,48 @@ function isActive(href: string) {
 }
 ---
 
-<aside
-  class="w-64 border-r border-[var(--m3-sys-outline)]/10 p-6 flex flex-col gap-8 bg-[var(--m3-sys-surface)]"
+<!-- Backdrop for Mobile -->
+<div
+  id="sidebar-backdrop"
+  class="fixed inset-0 bg-black/40 z-40 hidden opacity-0 transition-opacity duration-300 lg:hidden"
 >
+</div>
+
+<aside
+  id="main-sidebar"
+  class="fixed inset-y-0 left-0 z-50 w-64 border-r border-[var(--m3-sys-outline)]/10 p-6 flex flex-col gap-8 bg-[var(--m3-sys-surface)] transform -translate-x-full transition-transform duration-300 lg:relative lg:translate-x-0 lg:flex"
+>
+  <!-- Mobile Close Button -->
+  <button
+    id="sidebar-close"
+    class="lg:hidden absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--m3-sys-surface-variant)]/50 text-[var(--m3-sys-on-surface-variant)]"
+    aria-label="Cerrar menú"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <div class="lg:mb-2 px-4">
+    <h2
+      class="text-xl font-bold text-[var(--m3-sys-primary)] flex items-center gap-2"
+    >
+      <img src="/favicon.svg" alt="Logo" class="w-6 h-6" />
+      Biblioteca
+    </h2>
+  </div>
+
   <nav class="flex flex-col gap-1">
     {
       navItems.map((item) => (
@@ -107,7 +146,9 @@ function isActive(href: string) {
   </nav>
 
   <div class="mt-auto flex flex-col gap-4">
-    <ThemeToggle />
+    <div class="hidden lg:block">
+      <ThemeToggle />
+    </div>
     <Button variant="text" class="w-full !justify-start !px-4" id="logout-btn">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -169,6 +210,18 @@ function isActive(href: string) {
   import { signOut } from "firebase/auth";
 
   const logoutBtn = document.getElementById("logout-btn");
+  const sidebarClose = document.getElementById("sidebar-close");
+  const sidebar = document.getElementById("main-sidebar");
+  const backdrop = document.getElementById("sidebar-backdrop");
+
+  const closeSidebar = () => {
+    sidebar?.classList.add("-translate-x-full");
+    backdrop?.classList.add("opacity-0");
+    setTimeout(() => backdrop?.classList.add("hidden"), 300);
+  };
+
+  sidebarClose?.addEventListener("click", closeSidebar);
+  backdrop?.addEventListener("click", closeSidebar);
 
   logoutBtn?.addEventListener("click", async () => {
     try {

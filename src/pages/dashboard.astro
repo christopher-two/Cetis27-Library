@@ -10,6 +10,7 @@ import UserActivityChart from "../components/charts/UserActivityChart.astro";
 import Card from "../components/ui/Card.astro";
 import Button from "../components/ui/Button.astro";
 import Sidebar from "../components/Sidebar.astro";
+import MobileHeader from "../components/MobileHeader.astro";
 import ThemeToggle from "../components/ui/ThemeToggle.astro";
 import Skeleton from "../components/ui/Skeleton.astro";
 ---
@@ -18,27 +19,38 @@ import Skeleton from "../components/ui/Skeleton.astro";
   title="Panel Principal | Biblioteca Digital"
   description="Resumen de préstamos, libros y actividad reciente de la biblioteca."
 >
-  <div class="flex min-h-screen bg-[var(--m3-sys-light-surface)]">
+  <div
+    class="flex flex-col lg:flex-row min-h-screen bg-[var(--m3-sys-light-surface)]"
+  >
+    <!-- Mobile Header -->
+    <MobileHeader />
+
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Main Content -->
-    <main class="flex-1 p-8 h-screen overflow-y-auto overflow-x-hidden">
+    <main
+      class="flex-1 p-4 lg:p-8 h-auto lg:h-screen overflow-y-auto overflow-x-hidden"
+    >
       <!-- Header with Actions (Inlined from DashboardHeader) -->
-      <div class="flex items-center justify-between mb-8">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+      >
         <div>
-          <h1 class="text-3xl font-bold text-[var(--m3-sys-on-surface)]">
+          <h1
+            class="text-2xl lg:text-3xl font-bold text-[var(--m3-sys-on-surface)]"
+          >
             Panel de Control
           </h1>
-          <p class="text-[var(--m3-sys-on-surface-variant)] mt-1">
+          <p class="text-[var(--m3-sys-on-surface-variant)] text-sm mt-1">
             Resumen de actividad y acciones rápidas
           </p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
           <Button
             id="btn-digital-access-header"
             variant="outlined"
-            class="flex gap-2 items-center !border-[var(--m3-sys-primary)] !text-[var(--m3-sys-primary)] hover:!bg-[var(--m3-sys-primary)] hover:!text-[var(--m3-sys-on-primary)] transition-all shadow-sm"
+            class="flex-1 sm:flex-none flex gap-2 items-center !border-[var(--m3-sys-primary)] !text-[var(--m3-sys-primary)] hover:!bg-[var(--m3-sys-primary)] hover:!text-[var(--m3-sys-on-primary)] transition-all shadow-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +67,10 @@ import Skeleton from "../components/ui/Skeleton.astro";
             >
             Biblioteca Digital
           </Button>
-          <Button id="btn-new-loan-header" class="flex gap-2 items-center">
+          <Button
+            id="btn-new-loan-header"
+            class="flex-1 sm:flex-none flex gap-2 items-center"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"

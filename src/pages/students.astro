@@ -4,6 +4,7 @@ import Card from "../components/ui/Card.astro";
 import DataTable from "../components/ui/DataTable.astro";
 import Button from "../components/ui/Button.astro";
 import Sidebar from "../components/Sidebar.astro";
+import MobileHeader from "../components/MobileHeader.astro";
 import NewStudentSideSheet from "../features/students/NewStudentSideSheet.astro";
 import EditStudentSideSheet from "../features/students/EditStudentSideSheet.astro";
 import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
@@ -23,23 +24,35 @@ const headers = [
   title="Directorio de Alumnos | Biblioteca Digital"
   description="Gestión y consulta de alumnos registrados en el sistema."
 >
-  <div class="flex min-h-screen bg-[var(--m3-sys-light-surface)]">
+  <div
+    class="flex flex-col lg:flex-row min-h-screen bg-[var(--m3-sys-light-surface)]"
+  >
+    <!-- Mobile Header -->
+    <MobileHeader />
+
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Main Content -->
-    <main class="flex-1 p-8 h-screen overflow-y-auto">
+    <main class="flex-1 p-4 lg:p-8 h-auto lg:h-screen overflow-y-auto">
       <div class="flex flex-col gap-6 mb-8">
-        <div class="flex items-center justify-between">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
           <div>
-            <h1 class="text-3xl font-bold text-[var(--m3-sys-on-surface)]">
+            <h1
+              class="text-2xl lg:text-3xl font-bold text-[var(--m3-sys-on-surface)]"
+            >
               Directorio de Alumnos
             </h1>
-            <p class="text-[var(--m3-sys-on-surface-variant)] mt-1">
+            <p class="text-[var(--m3-sys-on-surface-variant)] text-sm mt-1">
               Consulta y gestiona los alumnos registrados en el sistema.
             </p>
           </div>
-          <Button class="shadow-md" onclick="window.openNewStudentSidesheet()">
+          <Button
+            class="shadow-md w-full sm:w-auto"
+            onclick="window.openNewStudentSidesheet()"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
