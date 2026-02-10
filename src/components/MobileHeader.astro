@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from "./ui/ThemeToggle.astro";
+import Logo from "./ui/Logo.astro";
 ---
 
 <header
@@ -28,7 +29,8 @@ import ThemeToggle from "./ui/ThemeToggle.astro";
       </svg>
     </button>
     <div class="flex items-center gap-2">
-      <img src="/favicon.svg" alt="Logo" class="w-6 h-6" />
+      <Logo size="sm" color="var(--m3-sys-primary)" />
+      <span class="font-bold text-[var(--m3-sys-on-surface)]">Override</span>
     </div>
   </div>
 

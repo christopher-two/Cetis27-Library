@@ -20,8 +20,9 @@ export interface Loan {
   loanDate: string; // ISO String YYYY-MM-DD
   dueDate: string;
   returnDate?: string;
-  status: "active" | "returned" | "overdue";
+  status: "active" | "returned" | "overdue" | "lost";
   createdAt?: Timestamp;
+  notes?: string;
 }
 
 const COLLECTION_NAME = "loans";

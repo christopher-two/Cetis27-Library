@@ -2,7 +2,6 @@
 import SideSheet from "../../components/ui/SideSheet.astro";
 import TextField from "../../components/ui/TextField.astro";
 import Button from "../../components/ui/Button.astro";
-import { books } from "../../data/books";
 ---
 
 <SideSheet id="registration-sidesheet" title="Nuevo Registro de Préstamo">
@@ -11,12 +10,51 @@ import { books } from "../../data/books";
     onsubmit="event.preventDefault(); window.registerLoan();"
   >
     <div class="flex flex-col gap-5">
-      <TextField
-        label="Matrícula del Alumno"
-        placeholder="Ej. 20240001"
-        required
-        id="reg-matricula"
-      />
+      <div class="flex flex-col gap-3">
+        <label
+          class="text-sm font-medium text-[var(--m3-sys-on-surface-variant)]"
+          >Alumno</label
+        >
+        <div class="relative group">
+          <div class="relative">
+            <input
+              type="text"
+              id="student-search"
+              placeholder="Buscar por nombre o matrícula..."
+              class="peer w-full px-4 py-3 rounded-[var(--m3-radius-sm)] bg-transparent border-b-2 border-[var(--m3-sys-outline-variant)] text-[var(--m3-sys-on-surface)] text-base focus:outline-none focus:border-[var(--m3-sys-primary)] transition-colors placeholder:text-[var(--m3-sys-on-surface-variant)]/50"
+              autocomplete="off"
+              required
+            />
+            <div
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--m3-sys-on-surface-variant)] pointer-events-none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"
+                ></path></svg
+              >
+            </div>
+          </div>
+
+          <!-- Student Search Results Dropdown -->
+          <div
+            id="student-dropdown"
+            class="absolute z-20 left-0 right-0 top-full mt-1 bg-[var(--m3-sys-surface)] rounded-[var(--m3-radius-md)] shadow-lg border border-[var(--m3-sys-outline-variant)] max-h-60 overflow-y-auto hidden"
+          >
+            <ul id="student-options-list" class="flex flex-col py-2">
+              <!-- Options will be injected here -->
+            </ul>
+          </div>
+        </div>
+      </div>
 
       <div class="flex flex-col gap-3">
         <label
@@ -104,28 +142,132 @@ import { books } from "../../data/books";
   </form>
 </SideSheet>
 
-<script define:vars={{ books }}>
-  let selectedBooks = [];
-  let currentSelectedBookId = null;
+<script>
+  import {
+    subscribeToBooks,
+    updateBook,
+    type Book,
+  } from "../../services/firebase/books";
+  import { addLoan } from "../../services/firebase/loans";
+  import {
+    subscribeToStudents,
+    type Student,
+  } from "../../services/firebase/students";
 
-  const bookSearch = document.getElementById("book-search");
+  let selectedBooks: { id: string; title: string }[] = [];
+  let currentSelectedBookId: string | null = null;
+  let allBooks: Book[] = [];
+
+  let allStudents: Student[] = [];
+  let currentSelectedStudent: Student | null = null;
+
+  const bookSearch = document.getElementById("book-search") as HTMLInputElement;
   const bookDropdown = document.getElementById("book-dropdown");
   const bookOptionsList = document.getElementById("book-options-list");
   const btnAddBook = document.getElementById("btn-add-book");
   const selectedList = document.getElementById("selected-books-list");
   const noBooksMsg = document.getElementById("no-books-msg");
 
-  function filterBooks(query) {
+  const studentSearch = document.getElementById(
+    "student-search",
+  ) as HTMLInputElement;
+  const studentDropdown = document.getElementById("student-dropdown");
+  const studentOptionsList = document.getElementById("student-options-list");
+
+  // Subscribe to real books data
+  subscribeToBooks((books) => {
+    allBooks = books;
+  });
+
+  // Subscribe to real students data
+  subscribeToStudents((students) => {
+    allStudents = students;
+  });
+
+  function filterStudents(query: string) {
     if (!query) return [];
     const lowerQuery = query.toLowerCase();
-    return books.filter(
-      (book) =>
-        book.title.toLowerCase().includes(lowerQuery) ||
-        book.id.toLowerCase().includes(lowerQuery),
+    return allStudents.filter(
+      (student) =>
+        student.name.toLowerCase().includes(lowerQuery) ||
+        student.matricula.toLowerCase().includes(lowerQuery),
     );
   }
 
-  function renderOptions(options) {
+  function renderStudentOptions(options: Student[]) {
+    if (!studentOptionsList) return;
+    studentOptionsList.innerHTML = "";
+
+    if (options.length === 0) {
+      const noResult = document.createElement("li");
+      noResult.className =
+        "px-4 py-3 text-sm text-[var(--m3-sys-on-surface-variant)] italic";
+      noResult.textContent = "No se encontraron alumnos";
+      studentOptionsList.appendChild(noResult);
+      return;
+    }
+
+    options.forEach((student) => {
+      const li = document.createElement("li");
+      li.className =
+        "px-4 py-3 hover:bg-[var(--m3-sys-surface-variant)]/50 cursor-pointer transition-colors text-[var(--m3-sys-on-surface)] flex flex-col gap-0.5 border-b border-[var(--m3-sys-outline-variant)]/50 last:border-0";
+      li.innerHTML = `
+            <span class="font-medium text-sm">${student.name}</span>
+            <span class="text-xs text-[var(--m3-sys-on-surface-variant)]">Matrícula: ${student.matricula} • ${student.career}</span>
+          `;
+      li.onclick = () => selectStudent(student);
+      studentOptionsList.appendChild(li);
+    });
+  }
+
+  function selectStudent(student: Student) {
+    if (!studentSearch) return;
+    studentSearch.value = student.name;
+    currentSelectedStudent = student;
+    if (studentDropdown) studentDropdown.classList.add("hidden");
+  }
+
+  studentSearch?.addEventListener("input", (e) => {
+    const query = (e.target as HTMLInputElement).value;
+    currentSelectedStudent = null;
+
+    if (!query) {
+      if (studentDropdown) studentDropdown.classList.add("hidden");
+      return;
+    }
+
+    const filtered = filterStudents(query);
+    renderStudentOptions(filtered);
+    if (studentDropdown) studentDropdown.classList.remove("hidden");
+  });
+
+  studentSearch?.addEventListener("focus", () => {
+    if (studentSearch && studentSearch.value && studentDropdown) {
+      studentDropdown.classList.remove("hidden");
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    const target = e.target as Node;
+    if (
+      !studentSearch?.contains(target) &&
+      !studentDropdown?.contains(target)
+    ) {
+      studentDropdown?.classList.add("hidden");
+    }
+  });
+
+  function filterBooks(query: string) {
+    if (!query) return [];
+    const lowerQuery = query.toLowerCase();
+    return allBooks.filter(
+      (book) =>
+        book.title.toLowerCase().includes(lowerQuery) ||
+        book.id?.toLowerCase().includes(lowerQuery),
+    );
+  }
+
+  function renderOptions(options: Book[]) {
     if (!bookOptionsList) return;
     bookOptionsList.innerHTML = "";
 
@@ -151,16 +293,16 @@ import { books } from "../../data/books";
     });
   }
 
-  function selectBook(book) {
+  function selectBook(book: Book) {
     if (!bookSearch) return;
     bookSearch.value = book.title;
-    currentSelectedBookId = book.id;
+    currentSelectedBookId = book.id || null;
     if (bookDropdown) bookDropdown.classList.add("hidden");
   }
 
   bookSearch?.addEventListener("input", (e) => {
-    const query = e.target.value;
-    currentSelectedBookId = null; // Reset selection on edit
+    const query = (e.target as HTMLInputElement).value;
+    currentSelectedBookId = null;
 
     if (!query) {
       if (bookDropdown) bookDropdown.classList.add("hidden");
@@ -172,17 +314,18 @@ import { books } from "../../data/books";
     if (bookDropdown) bookDropdown.classList.remove("hidden");
   });
 
-  // Close dropdown when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!bookSearch?.contains(e.target) && !bookDropdown?.contains(e.target)) {
-      bookDropdown?.classList.add("hidden");
+  bookSearch?.addEventListener("focus", () => {
+    if (bookSearch && bookSearch.value && bookDropdown) {
+      bookDropdown.classList.remove("hidden");
     }
   });
 
-  // Show dropdown on focus if empty
-  bookSearch?.addEventListener("focus", () => {
-    if (bookSearch.value && bookDropdown) {
-      bookDropdown.classList.remove("hidden");
+  document.addEventListener("click", (e) => {
+    if (
+      !bookSearch?.contains(e.target as Node) &&
+      !bookDropdown?.contains(e.target as Node)
+    ) {
+      bookDropdown?.classList.add("hidden");
     }
   });
 
@@ -195,27 +338,14 @@ import { books } from "../../data/books";
       item.className =
         "flex items-center justify-between p-3 bg-[var(--m3-sys-surface-variant)]/30 rounded-[var(--m3-radius-md)] border border-[var(--m3-sys-outline-variant)] group";
 
-      // Content
       const content = document.createElement("div");
       content.className = "flex flex-col";
       content.innerHTML = `<span class="text-sm font-medium text-[var(--m3-sys-on-surface)]">${book.title}</span><span class="text-xs text-[var(--m3-sys-on-surface-variant)]">ID: ${book.id}</span>`;
       item.appendChild(content);
 
-      // Actions
       const actions = document.createElement("div");
       actions.className = "flex gap-1";
 
-      // Edit Button
-      const editBtn = document.createElement("button");
-      editBtn.type = "button";
-      editBtn.className =
-        "text-[var(--m3-sys-primary)] hover:bg-[var(--m3-sys-primary-container)] p-1.5 rounded-full transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100";
-      editBtn.title = "Editar";
-      editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`;
-      editBtn.onclick = () => editBook(index);
-      actions.appendChild(editBtn);
-
-      // Remove Button
       const removeBtn = document.createElement("button");
       removeBtn.type = "button";
       removeBtn.className =
@@ -236,37 +366,21 @@ import { books } from "../../data/books";
     }
   }
 
-  function removeBook(index) {
+  function removeBook(index: number) {
     selectedBooks.splice(index, 1);
     updateList();
-  }
-
-  function editBook(index) {
-    const book = selectedBooks[index];
-    selectedBooks.splice(index, 1);
-    updateList();
-
-    // Set back to input
-    if (bookSearch) {
-      bookSearch.value = book.title;
-      currentSelectedBookId = book.id;
-      bookSearch.focus();
-      // Trigger search to show dropdown of other options if needed?
-      // Better to show the current one selected or filtered.
-    }
   }
 
   btnAddBook?.addEventListener("click", () => {
-    // Logic to handle 'Enter' key on input could also call this
     if (!currentSelectedBookId) {
       const query = bookSearch.value;
       if (!query) return;
 
-      const exactMatch = books.find(
+      const exactMatch = allBooks.find(
         (b) => b.title.toLowerCase() === query.toLowerCase() || b.id === query,
       );
       if (exactMatch) {
-        currentSelectedBookId = exactMatch.id;
+        currentSelectedBookId = exactMatch.id || null;
       } else {
         alert("Por favor selecciona un libro válido de la lista.");
         return;
@@ -274,54 +388,87 @@ import { books } from "../../data/books";
     }
 
     const id = currentSelectedBookId;
-    const book = books.find((b) => b.id === id);
+    const book = allBooks.find((b) => b.id === id);
     if (!book) return;
 
-    // Check if already added
+    if (book.available <= 0) {
+      alert("No hay copias disponibles de este libro.");
+      return;
+    }
+
     if (selectedBooks.some((b) => b.id === id)) {
       alert("Este libro ya ha sido agregado a la lista.");
       return;
     }
 
-    selectedBooks.push({ id: book.id, title: book.title });
+    selectedBooks.push({ id: book.id!, title: book.title });
     updateList();
 
-    // Reset
     bookSearch.value = "";
     currentSelectedBookId = null;
     if (bookDropdown) bookDropdown.classList.add("hidden");
   });
 
-  // Allow Enter key to add book
   bookSearch?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      btnAddBook.click();
+      btnAddBook?.click();
     }
   });
 
-  window.registerLoan = () => {
-    const matricula = document.getElementById("reg-matricula").value;
-    const fecha = document.getElementById("reg-fecha").value;
+  // @ts-ignore
+  window.registerLoan = async () => {
+    const fechaInput = document.getElementById("reg-fecha") as HTMLInputElement;
+    const fecha = fechaInput.value;
+
+    if (!currentSelectedStudent) {
+      alert("Por favor selecciona un alumno del buscador.");
+      return;
+    }
 
     if (selectedBooks.length === 0) {
       noBooksMsg?.classList.remove("hidden");
       return;
     }
 
-    console.log("Registrando préstamo:", {
-      matricula,
-      books: selectedBooks,
-      fecha,
-    });
-    alert(
-      `Préstamo registrado exitosamente para ${selectedBooks.length} libro(s).`,
-    );
+    try {
+      const loanPromises = selectedBooks.map(async (book) => {
+        // 1. Create the loan document
+        await addLoan({
+          bookId: book.id,
+          bookTitle: book.title,
+          studentId: currentSelectedStudent!.matricula,
+          studentName: currentSelectedStudent!.name,
+          loanDate: new Date().toISOString().split("T")[0],
+          dueDate: fecha,
+          status: "active",
+        });
 
-    // Reset and close
-    selectedBooks = [];
-    updateList();
-    document.getElementById("reg-matricula").value = "";
-    window.closeRegistrationSidesheet();
+        // 2. Decrement available copies
+        const bookData = allBooks.find((b) => b.id === book.id);
+        if (bookData) {
+          await updateBook(book.id, {
+            available: (bookData.available || 1) - 1,
+          });
+        }
+      });
+
+      await Promise.all(loanPromises);
+
+      alert(
+        `Préstamo registrado exitosamente para ${selectedBooks.length} libro(s).`,
+      );
+
+      // Reset and close
+      selectedBooks = [];
+      updateList();
+      if (studentSearch) studentSearch.value = "";
+      currentSelectedStudent = null;
+      // @ts-ignore
+      window.closeRegistrationSidesheet();
+    } catch (error) {
+      console.error("Error registering loan:", error);
+      alert("Hubo un error al registrar el préstamo.");
+    }
   };
 </script>

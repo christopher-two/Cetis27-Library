@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from "./ui/ThemeToggle.astro";
 import Button from "./ui/Button.astro";
+import Logo from "./ui/Logo.astro";
 
 const currentPath = Astro.url.pathname;
 
@@ -48,6 +49,15 @@ function isActive(href: string) {
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
   </button>
+
+  <!-- Logo Section -->
+  <div class="flex items-center gap-3 px-4 py-2 mb-2">
+    <Logo size="md" color="var(--m3-sys-primary)" />
+    <span
+      class="font-bold text-lg text-[var(--m3-sys-on-surface)] tracking-tight"
+      >Override</span
+    >
+  </div>
 
   <nav class="flex flex-col gap-1">
     {

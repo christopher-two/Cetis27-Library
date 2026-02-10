@@ -101,58 +101,49 @@ import Button from "../../components/ui/Button.astro";
 </SideSheet>
 
 <script>
-  // Mock Active Loans Data
-  const activeLoans = [
-    {
-      id: "L-2024-001",
-      bookTitle: "Cien años de soledad",
-      student: "Juan Pérez",
-      returnDate: "2024-02-15",
-    },
-    {
-      id: "L-2024-002",
-      bookTitle: "Clean Code",
-      student: "Maria González",
-      returnDate: "2024-02-20",
-    },
-    {
-      id: "L-2024-003",
-      bookTitle: "El Principito",
-      student: "Carlos López",
-      returnDate: "2024-02-10",
-    },
-    {
-      id: "L-2024-004",
-      bookTitle: "Don Quijote",
-      student: "Ana Martinez",
-      returnDate: "2024-02-25",
-    },
-    {
-      id: "L-2024-005",
-      bookTitle: "Javascript: The Good Parts",
-      student: "Sofia Rodriguez",
-      returnDate: "2024-02-18",
-    },
-  ];
+  import {
+    subscribeToLoans,
+    updateLoan,
+    type Loan,
+  } from "../../services/firebase/loans";
+  import {
+    subscribeToBooks,
+    updateBook,
+    type Book,
+  } from "../../services/firebase/books";
 
-  let currentSelectedLoan = null;
+  let activeLoans: Loan[] = [];
+  let allBooks: Book[] = [];
+  let currentSelectedLoan: Loan | null = null;
 
-  const returnSearch = document.getElementById("return-search");
+  const returnSearch = document.getElementById(
+    "return-search",
+  ) as HTMLInputElement;
   const returnDropdown = document.getElementById("return-dropdown");
   const returnOptionsList = document.getElementById("return-options-list");
 
-  function filterLoans(query) {
+  // Subscribe to real data
+  subscribeToLoans((loans) => {
+    activeLoans = loans.filter((loan) => loan.status === "active");
+  });
+
+  subscribeToBooks((books) => {
+    allBooks = books;
+  });
+
+  function filterLoans(query: string) {
     if (!query) return [];
     const lowerQuery = query.toLowerCase();
     return activeLoans.filter(
       (loan) =>
-        loan.id.toLowerCase().includes(lowerQuery) ||
+        loan.id?.toLowerCase().includes(lowerQuery) ||
         loan.bookTitle.toLowerCase().includes(lowerQuery) ||
-        loan.student.toLowerCase().includes(lowerQuery),
+        loan.studentName.toLowerCase().includes(lowerQuery) ||
+        loan.studentId.toLowerCase().includes(lowerQuery),
     );
   }
 
-  function renderReturnOptions(options) {
+  function renderReturnOptions(options: Loan[]) {
     if (!returnOptionsList) return;
     returnOptionsList.innerHTML = "";
 
@@ -168,15 +159,15 @@ import Button from "../../components/ui/Button.astro";
     options.forEach((loan) => {
       const li = document.createElement("li");
       li.className =
-        "px-4 py-3 hover:bg-[var(--m3-sys-surface-variant)]/50 cursor-pointer transition-colors text-[var(--m3-sys-on-surface)] flex flex-col gap-0.5";
+        "px-4 py-3 hover:bg-[var(--m3-sys-surface-variant)]/50 cursor-pointer transition-colors text-[var(--m3-sys-on-surface)] flex flex-col gap-0.5 border-b border-[var(--m3-sys-outline-variant)]/50 last:border-0";
       li.innerHTML = `
                 <div class="flex justify-between items-center">
                     <span class="font-medium text-sm">${loan.bookTitle}</span>
-                    <span class="text-xs bg-[var(--m3-sys-primary-container)] text-[var(--m3-sys-on-primary-container)] px-2 py-0.5 rounded-full">${loan.id}</span>
+                    <span class="text-xs bg-[var(--m3-sys-primary-container)] text-[var(--m3-sys-on-primary-container)] px-2 py-0.5 rounded-full">${loan.id?.slice(-6).toUpperCase() || "ID"}</span>
                 </div>
                 <div class="flex justify-between text-xs text-[var(--m3-sys-on-surface-variant)]">
-                    <span>${loan.student}</span>
-                    <span>Vence: ${loan.returnDate}</span>
+                    <span>${loan.studentName}</span>
+                    <span>Vence: ${loan.dueDate}</span>
                 </div>
             `;
       li.onclick = () => selectLoan(loan);
@@ -184,16 +175,16 @@ import Button from "../../components/ui/Button.astro";
     });
   }
 
-  function selectLoan(loan) {
+  function selectLoan(loan: Loan) {
     if (!returnSearch) return;
-    returnSearch.value = `${loan.id} - ${loan.bookTitle}`;
+    returnSearch.value = `${loan.bookTitle} (${loan.studentName})`;
     currentSelectedLoan = loan;
     if (returnDropdown) returnDropdown.classList.add("hidden");
   }
 
   returnSearch?.addEventListener("input", (e) => {
-    const query = e.target.value;
-    currentSelectedLoan = null; // Reset selection on edit
+    const query = (e.target as HTMLInputElement).value;
+    currentSelectedLoan = null;
 
     if (!query) {
       if (returnDropdown) returnDropdown.classList.add("hidden");
@@ -205,54 +196,72 @@ import Button from "../../components/ui/Button.astro";
     if (returnDropdown) returnDropdown.classList.remove("hidden");
   });
 
-  // Close dropdown when clicking outside
+  returnSearch?.addEventListener("focus", () => {
+    if (returnSearch.value && returnDropdown) {
+      returnDropdown.classList.remove("hidden");
+    }
+  });
+
   document.addEventListener("click", (e) => {
     if (
-      !returnSearch?.contains(e.target) &&
-      !returnDropdown?.contains(e.target)
+      !returnSearch?.contains(e.target as Node) &&
+      !returnDropdown?.contains(e.target as Node)
     ) {
       returnDropdown?.classList.add("hidden");
     }
   });
 
-  // Handle form submission
-  window.processReturn = (e) => {
+  // @ts-ignore
+  window.processReturn = async (e: Event) => {
     e.preventDefault();
 
-    // Allow manual entry if it matches an ID, otherwise warn
-    if (!currentSelectedLoan && returnSearch && returnSearch.value) {
-      const exactMatch = activeLoans.find(
-        (l) => l.id.toLowerCase() === returnSearch.value.toLowerCase(),
-      );
-      if (exactMatch) currentSelectedLoan = exactMatch;
-    }
-
-    const status = document.getElementById("return-status").value;
-    const notes = document.getElementById("return-notes").value;
-
-    if (!returnSearch || !returnSearch.value) {
-      alert(
-        "Por favor ingrese el ID del préstamo o seleccione uno de la lista.",
-      );
+    if (!currentSelectedLoan) {
+      alert("Por favor selecciona un préstamo de la lista.");
       return;
     }
 
-    console.log("Procesando devolución:", {
-      loan: currentSelectedLoan || { id: returnSearch.value, manual: true },
-      status,
-      notes,
-    });
+    const status = (
+      document.getElementById("return-status") as HTMLSelectElement
+    ).value;
+    const notes = (document.getElementById("return-notes") as HTMLInputElement)
+      .value;
 
-    alert(
-      `Devolución registrada exitosamente${currentSelectedLoan ? ` para ${currentSelectedLoan.bookTitle}` : ""}.`,
-    );
+    try {
+      // 1. Update Loan status
+      await updateLoan(currentSelectedLoan.id!, {
+        status: status === "lost" ? "lost" : "returned",
+        returnDate: new Date().toISOString().split("T")[0],
+        notes: notes,
+      });
 
-    // Reset
-    if (returnSearch) returnSearch.value = "";
-    if (document.getElementById("return-notes"))
-      document.getElementById("return-notes").value = "";
-    currentSelectedLoan = null;
+      // 2. Increment book availability if returned (even if damaged, it's back in inventory)
+      // Only if not lost
+      if (status !== "lost") {
+        const book = allBooks.find((b) => b.id === currentSelectedLoan!.bookId);
+        if (book) {
+          await updateBook(book.id!, {
+            available: (book.available || 0) + 1,
+          });
+        }
+      }
 
-    window.closeReturnSidesheet();
+      alert(
+        `Devolución registrada exitosamente para ${currentSelectedLoan.bookTitle}.`,
+      );
+
+      // Reset and close
+      if (returnSearch) returnSearch.value = "";
+      const notesEl = document.getElementById(
+        "return-notes",
+      ) as HTMLInputElement;
+      if (notesEl) notesEl.value = "";
+      currentSelectedLoan = null;
+
+      // @ts-ignore
+      window.closeReturnSidesheet();
+    } catch (error) {
+      console.error("Error processing return:", error);
+      alert("Hubo un error al procesar la devolución.");
+    }
   };
 </script>
