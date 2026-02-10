@@ -6,8 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "deploy": "npx firebase-tools deploy"
+    "astro": "astro"
   },
   "dependencies": {
     "apexcharts": "^5.3.6",
