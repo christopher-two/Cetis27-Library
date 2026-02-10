@@ -159,10 +159,14 @@ const headers = [
     let currentStudents: Student[] = [];
 
     const careerMap: Record<string, string> = {
-      isi: "Ingeniería en Sistemas",
-      ind: "Ingeniería Industrial",
-      admin: "Administración",
-      other: "Otro",
+      construccion: "Carrera Técnica en Construcción",
+      contabilidad: "Carrera Técnica en Contabilidad",
+      electricidad: "Carrera Técnica en Electricidad",
+      electronica: "Carrera Técnica en Electrónica",
+      enfermeria: "Carrera Técnica en Enfermería General",
+      programacion: "Carrera Técnica en Programación",
+      puericultura: "Carrera Técnica en Puericultura",
+      secretariado: "Carrera Técnica en Secretariado Ejecutivo Bilingüe",
     };
 
     const getCareerName = (code: string) => careerMap[code] || code;
