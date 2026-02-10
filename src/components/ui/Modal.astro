@@ -18,14 +18,14 @@ const { id, title, class: className } = Astro.props;
 >
   <div class="flex flex-col h-full">
     <header
-      class="px-6 py-4 flex items-center justify-between border-b border-[var(--m3-sys-light-outline)]/10"
+      class="px-6 py-4 flex items-center justify-between border-b border-[var(--m3-sys-outline)]/10"
     >
-      <h2 class="text-xl font-semibold text-[var(--m3-sys-light-on-surface)]">
+      <h2 class="text-xl font-semibold text-[var(--m3-sys-on-surface)]">
         {title}
       </h2>
       <button
         onclick={`document.getElementById('${id}').close()`}
-        class="p-2 rounded-full hover:bg-[var(--m3-sys-light-surface-variant)]/50 text-[var(--m3-sys-light-on-surface-variant)]"
+        class="p-2 rounded-full hover:bg-[var(--m3-sys-surface-variant)]/50 text-[var(--m3-sys-on-surface-variant)]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
