@@ -10,6 +10,7 @@
   --m3-sys-on-primary-container: #001d36;
   
   --m3-sys-surface: #fdfcff;
+  --m3-sys-light-surface: #fdfcff;
   --m3-sys-on-surface: #1a1c1e;
   --m3-sys-surface-variant: #dfe2eb;
   --m3-sys-on-surface-variant: #43474e;
@@ -43,6 +44,7 @@
   --m3-sys-on-primary-container: #d1e4ff;
   
   --m3-sys-surface: #1a1c1e;
+  --m3-sys-light-surface: #1a1c1e;
   --m3-sys-on-surface: #e2e2e6;
   --m3-sys-surface-variant: #43474e;
   --m3-sys-on-surface-variant: #c3c7cf;
