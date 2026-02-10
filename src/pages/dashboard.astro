@@ -275,6 +275,8 @@ import Skeleton from "../components/ui/Skeleton.astro";
 <script>
   import { subscribeToLoans, type Loan } from "../services/firebase/loans";
   import { subscribeToBooks, type Book } from "../services/firebase/books";
+  import { auth } from "../lib/firebase";
+  import { signOut } from "firebase/auth";
 
   function setupDashboardActions() {
     // Helper to add click listeners safely
