@@ -27,7 +27,9 @@ const radiusMap = {
   style={{
     width,
     height,
+    maxWidth: "100%",
     borderRadius: radiusMap[rounded],
+    display: width === "100%" ? "block" : "inline-block",
   }}
 >
 </div>
