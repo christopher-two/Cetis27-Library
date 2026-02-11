@@ -169,3 +169,33 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   );
   background-size: 800px 400px;
 }
+
+/* Custom Material 3 Scrollbar */
+@media (min-width: 768px) {
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: var(--m3-sys-primary) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--m3-sys-primary);
+    border-radius: 10px;
+    border: 3px solid var(--m3-sys-surface); /* Floating effect */
+    background-clip: content-box;
+    transition: background-color 0.2s ease;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--m3-sys-primary-container);
+  }
+}
+

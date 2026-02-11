@@ -33,8 +33,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    match /loans/{loanId} {
-      allow read, write: if isAdmin();
+    // Events: Public read (or authenticated), Admin write
+    match /events/{eventId} {
+      allow read: if true; // Publicly visible
+      allow write: if isAdmin();
+    }
+
+    // Registrations: Users can read/create their own. Admins can read/write all.
+    match /registrations/{registrationId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid && request.resource.data.status == 'cancelled');
+      allow delete: if isAdmin();
     }
 
     // Default deny

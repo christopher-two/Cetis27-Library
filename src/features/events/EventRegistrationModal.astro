@@ -1,0 +1,202 @@
+---
+import type { Event } from "../../services/firebase/events";
+
+interface Props {
+  event: Event;
+}
+
+const { event } = Astro.props;
+---
+
+<dialog
+  id="registration-modal"
+  class="rounded-xl shadow-2xl p-0 w-full max-w-lg backdrop:bg-black/50"
+>
+  <div class="bg-[var(--m3-sys-surface)]">
+    <div
+      class="px-6 py-4 border-b border-[var(--m3-sys-outline)]/20 flex justify-between items-center"
+    >
+      <h3 class="text-lg font-bold text-[var(--m3-sys-on-surface)]">
+        Inscripción al Evento
+      </h3>
+      <button
+        onclick="document.getElementById('registration-modal').close()"
+        class="text-[var(--m3-sys-on-surface-variant)] hover:text-[var(--m3-sys-primary)] transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"></path></svg
+        >
+      </button>
+    </div>
+
+    <form id="registration-form" class="p-6 space-y-6">
+      <input type="hidden" name="eventId" value={event.id} />
+
+      <div>
+        <p class="text-sm text-[var(--m3-sys-on-surface-variant)] mb-1">
+          Te estás inscribiendo a:
+        </p>
+        <p class="font-semibold text-[var(--m3-sys-primary)]">{event.title}</p>
+      </div>
+
+      <!-- Custom Fields -->
+      {
+        event.customFields && event.customFields.length > 0 && (
+          <div class="space-y-4 border-t border-[var(--m3-sys-outline)]/20 pt-4">
+            <h4 class="text-sm font-medium text-[var(--m3-sys-on-surface)]">
+              Preguntas Obligatorias
+            </h4>
+
+            {event.customFields.map((field, index) => (
+              <div class="space-y-1">
+                <label class="block text-sm font-medium text-[var(--m3-sys-on-surface-variant)]">
+                  {field.label}{" "}
+                  {field.required && (
+                    <span class="text-[var(--m3-sys-error)]">*</span>
+                  )}
+                </label>
+
+                {field.type === "text" && (
+                  <input
+                    type="text"
+                    name={`custom_${index}`}
+                    required={field.required}
+                    class="w-full px-3 py-2 border border-[var(--m3-sys-outline)]/50 rounded-lg focus:ring-2 focus:ring-[var(--m3-sys-primary)] focus:border-[var(--m3-sys-primary)] outline-none bg-transparent text-[var(--m3-sys-on-surface)]"
+                  />
+                )}
+
+                {field.type === "number" && (
+                  <input
+                    type="number"
+                    name={`custom_${index}`}
+                    required={field.required}
+                    class="w-full px-3 py-2 border border-[var(--m3-sys-outline)]/50 rounded-lg focus:ring-2 focus:ring-[var(--m3-sys-primary)] focus:border-[var(--m3-sys-primary)] outline-none bg-transparent text-[var(--m3-sys-on-surface)]"
+                  />
+                )}
+
+                {field.type === "select" && (
+                  <select
+                    name={`custom_${index}`}
+                    required={field.required}
+                    class="w-full px-3 py-2 border border-[var(--m3-sys-outline)]/50 rounded-lg focus:ring-2 focus:ring-[var(--m3-sys-primary)] focus:border-[var(--m3-sys-primary)] outline-none bg-[var(--m3-sys-surface)] text-[var(--m3-sys-on-surface)]"
+                  >
+                    <option value="">Seleccionar...</option>
+                    {field.options?.map((opt) => (
+                      <option value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                )}
+
+                {field.type === "checkbox" && (
+                  <div class="flex items-center gap-2 mt-1">
+                    <input
+                      type="checkbox"
+                      name={`custom_${index}`}
+                      id={`custom_${index}`}
+                      required={field.required}
+                      class="rounded text-[var(--m3-sys-primary)] focus:ring-[var(--m3-sys-primary)]"
+                    />
+                    <label
+                      for={`custom_${index}`}
+                      class="text-sm text-[var(--m3-sys-on-surface-variant)]"
+                    >
+                      Sí, confirmo
+                    </label>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )
+      }
+
+      <div class="pt-4 flex justify-end gap-3">
+        <button
+          type="button"
+          onclick="document.getElementById('registration-modal').close()"
+          class="px-4 py-2 border border-[var(--m3-sys-outline)] rounded-lg text-[var(--m3-sys-on-surface-variant)] hover:bg-[var(--m3-sys-surface-variant)]/10"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-[var(--m3-sys-primary)] text-[var(--m3-sys-on-primary)] rounded-lg hover:opacity-90 shadow-md"
+        >
+          Confirmar Inscripción
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<script>
+  import { registerForEvent } from "../../services/firebase/events";
+  import { auth } from "../../lib/firebase";
+
+  const form = document.getElementById("registration-form") as HTMLFormElement;
+  const modal = document.getElementById(
+    "registration-modal",
+  ) as HTMLDialogElement;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!auth.currentUser) {
+      alert("Debes iniciar sesión para inscribirte");
+      return;
+    }
+
+    // Getting eventId from the hidden input within the form
+    const eventIdInput = form.querySelector(
+      'input[name="eventId"]',
+    ) as HTMLInputElement;
+    const eventId = eventIdInput.value;
+
+    const formData = new FormData(form);
+    const customData: Record<string, any> = {};
+
+    // Dynamic key extraction handling
+    // We need to map the index back to the label or just store by label if we passed the event object to client JS (complex).
+    // Ideally, we'd use the field label as name, but for simplicity/safety with special chars, we used indices.
+    // For this prototype, let's just store keys as "Question Label: Answer".
+
+    // TO DO: A more robust way would be to pass the schema to client JS.
+    // For now, let's iterate form entries and filter for 'custom_'.
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith("custom_")) {
+        // Find the label associated with this input
+        const input = form.querySelector(`[name="${key}"]`);
+        // Find the label element previous to it
+        // This is fragile. Better approach: Pass fields to script.
+        customData[key] = value;
+      }
+    }
+
+    try {
+      await registerForEvent(
+        eventId,
+        {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email || "",
+          displayName: auth.currentUser.displayName || "Usuario",
+        },
+        customData,
+      );
+      alert("¡Inscripción realizada con éxito!");
+      modal.close();
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert("Error en la inscripción: " + (error as Error).message);
+    }
+  });
+</script>
