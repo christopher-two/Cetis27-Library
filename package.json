@@ -9,9 +9,11 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@genkit-ai/googleai": "^1.28.0",
     "apexcharts": "^5.3.6",
     "astro": "^5.17.1",
-    "firebase": "^12.9.0"
+    "firebase": "^12.9.0",
+    "genkit": "^1.28.0"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^6.0.2",

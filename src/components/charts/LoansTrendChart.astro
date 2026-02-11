@@ -22,6 +22,16 @@ import Skeleton from "../ui/Skeleton.astro";
 
   let chart: ApexCharts | null = null;
 
+  // Define color palettes
+  const lightModeColors = ["#B71C1C", "#C62828"]; // Dark Reds for Light Mode
+  const darkModeColors = ["#EF9A9A", "#E57373"]; // Light Reds for Dark Mode
+
+  const getThemeColors = () => {
+    return document.documentElement.classList.contains("dark")
+      ? darkModeColors
+      : lightModeColors;
+  };
+
   const options = {
     series: [],
     chart: {
@@ -35,6 +45,7 @@ import Skeleton from "../ui/Skeleton.astro";
       animations: {
         enabled: true,
       },
+      background: "transparent",
     },
     dataLabels: {
       enabled: false,
@@ -79,7 +90,7 @@ import Skeleton from "../ui/Skeleton.astro";
         format: "dd MMM yyyy",
       },
     },
-    colors: ["#64B5F6", "#1976D2"],
+    colors: getThemeColors(),
     fill: {
       type: "gradient",
       gradient: {
@@ -108,9 +119,38 @@ import Skeleton from "../ui/Skeleton.astro";
   function renderChart() {
     const chartElement = document.querySelector("#loans-trend-chart");
     if (chartElement && !chart) {
+      options.colors = getThemeColors(); // Ensure correct colors on render
       chart = new ApexCharts(chartElement, options);
       chart.render();
+
+      // Setup theme observer
+      setupThemeObserver();
     }
+  }
+
+  let observer: MutationObserver | null = null;
+  function setupThemeObserver() {
+    if (observer) return; // Recently setup
+
+    observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "class"
+        ) {
+          if (chart) {
+            chart.updateOptions({
+              colors: getThemeColors(),
+            });
+          }
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
   }
 
   function updateChart(event: CustomEvent) {
@@ -155,6 +195,10 @@ import Skeleton from "../ui/Skeleton.astro";
 
   renderChart();
   document.addEventListener("astro:page-load", () => {
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
     chart = null;
     renderChart();
   });

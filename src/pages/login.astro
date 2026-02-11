@@ -4,46 +4,77 @@ import LoginForm from "../features/auth/LoginForm.astro";
 ---
 
 <Layout
-  title="Iniciar Sesión | Biblioteca Digital"
-  description="Accede al sistema de gestión de biblioteca digital."
+  title="Entrar | Biblioteca Digital"
+  description="Acceso exclusivo para personal autorizado del CETIS 27."
 >
   <main
-    class="min-h-screen flex flex-col items-center justify-center p-4 bg-[var(--m3-sys-light-surface)]"
+    class="min-h-screen w-full flex bg-[var(--m3-sys-surface)] overflow-hidden"
   >
-    <div class="w-full max-w-md flex flex-col gap-8">
-      <LoginForm />
+    <!-- Visual Section (Left) -->
+    <div
+      class="hidden lg:flex w-1/2 relative bg-[var(--m3-sys-primary-container)] items-center justify-center overflow-hidden"
+    >
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-[var(--m3-sys-primary)]/5 to-transparent z-10"
+      >
+      </div>
 
-      <div class="text-center animate-fade-in">
+      <div class="relative z-20 text-center p-12 max-w-lg">
+        <div class="mb-8 inline-flex items-center justify-center w-48 h-48 p-4">
+          <img
+            src="/cetis.svg"
+            alt="Logo Cetis 27"
+            class="w-full h-full object-contain filter drop-shadow-xl dark:brightness-0 dark:invert"
+          />
+        </div>
+        <h1
+          class="font-display text-5xl font-bold mb-6 text-[var(--m3-sys-on-primary-container)] leading-tight"
+        >
+          Biblioteca Digital
+        </h1>
         <p
-          class="text-[10px] text-[var(--m3-sys-on-surface-variant)] opacity-50 uppercase tracking-widest mb-1"
+          class="text-lg text-[var(--m3-sys-on-primary-container)]/80 font-normal leading-relaxed"
         >
-          Plataforma desarrollada por
+          Sistema interno de control y gestión bibliotecaria para la comunidad
+          del CETIS 27.
         </p>
-        <a
-          href="https://www.override.com.mx"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-sm font-bold text-[var(--m3-sys-primary)] hover:underline flex items-center justify-center gap-1.5 transition-all hover:scale-105"
-        >
-          Override
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            ><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-            ></path><polyline points="15 3 21 3 21 9"></polyline><line
-              x1="10"
-              y1="14"
-              x2="21"
-              y2="3"></line></svg
+      </div>
+    </div>
+
+    <!-- Form Section (Right) -->
+    <div
+      class="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12 md:p-16 relative"
+    >
+      <div class="w-full max-w-md animate-fade-in-up">
+        <LoginForm />
+
+        <div class="mt-12 text-center">
+          <p
+            class="text-xs text-[var(--m3-sys-on-surface-variant)] opacity-60 uppercase tracking-widest mb-2 font-medium"
           >
-        </a>
+            Powered by
+          </p>
+          <a
+            href="https://www.override.com.mx"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-sm font-bold text-[var(--m3-sys-primary)] hover:opacity-80 transition-opacity font-display"
+          >
+            Override
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              ><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg
+            >
+          </a>
+        </div>
       </div>
     </div>
   </main>

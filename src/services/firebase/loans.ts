@@ -8,6 +8,8 @@ import {
   onSnapshot,
   query,
   orderBy,
+  where,
+  getDocs,
   type Timestamp
 } from "firebase/firestore";
 
@@ -23,6 +25,7 @@ export interface Loan {
   status: "active" | "returned" | "overdue" | "lost";
   createdAt?: Timestamp;
   notes?: string;
+  returnCondition?: "good" | "damaged" | "lost";
 }
 
 const COLLECTION_NAME = "loans";
@@ -37,6 +40,19 @@ export const subscribeToLoans = (callback: (loans: Loan[]) => void) => {
     })) as Loan[];
     callback(loans);
   });
+};
+
+export const getLoansByStudent = async (studentId: string) => {
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where("studentId", "==", studentId),
+    orderBy("loanDate", "desc")
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Loan[];
 };
 
 export const addLoan = async (loan: Omit<Loan, "id">) => {

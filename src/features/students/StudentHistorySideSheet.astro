@@ -1,0 +1,307 @@
+---
+import SideSheet from "../../components/ui/SideSheet.astro";
+import Button from "../../components/ui/Button.astro";
+import Skeleton from "../../components/ui/Skeleton.astro";
+
+interface Props {
+  id?: string;
+}
+
+const { id = "student-history-sidesheet" } = Astro.props;
+---
+
+<SideSheet
+  id={id}
+  title="Historial del Alumno"
+  class="w-full sm:w-[500px] lg:w-[600px]"
+>
+  <div id="student-history-content" class="flex flex-col gap-6">
+    <!-- Student Header -->
+    <div
+      class="flex items-center gap-4 p-4 rounded-[var(--m3-radius-lg)] bg-[var(--m3-sys-surface-variant)]/30"
+    >
+      <div
+        class="w-16 h-16 rounded-full bg-[var(--m3-sys-primary)]/10 flex items-center justify-center text-[var(--m3-sys-primary)]"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle
+            cx="12"
+            cy="7"
+            r="4"></circle></svg
+        >
+      </div>
+      <div>
+        <h3
+          id="history-student-name"
+          class="text-lg font-bold text-[var(--m3-sys-on-surface)]"
+        >
+          Cargando...
+        </h3>
+        <p
+          id="history-student-matricula"
+          class="text-sm text-[var(--m3-sys-on-surface-variant)]"
+        >
+          ...
+        </p>
+        <span
+          id="history-student-career"
+          class="text-xs text-[var(--m3-sys-outline)] block mt-1"
+        >
+          ...
+        </span>
+      </div>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="grid grid-cols-2 gap-4">
+      <div
+        class="p-4 rounded-[var(--m3-radius-lg)] border border-[var(--m3-sys-outline)]/20 text-center"
+      >
+        <span
+          class="block text-2xl font-bold text-[var(--m3-sys-primary)]"
+          id="history-total-loans">-</span
+        >
+        <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
+          >Préstamos Totales</span
+        >
+      </div>
+      <div
+        class="p-4 rounded-[var(--m3-radius-lg)] border border-[var(--m3-sys-outline)]/20 text-center"
+      >
+        <span
+          class="block text-2xl font-bold text-[var(--m3-sys-tertiary)]"
+          id="history-active-loans">-</span
+        >
+        <span class="text-xs text-[var(--m3-sys-on-surface-variant)]"
+          >Activos</span
+        >
+      </div>
+    </div>
+
+    <!-- Loan Timeline -->
+    <div class="flex flex-col gap-4">
+      <h4 class="text-base font-bold text-[var(--m3-sys-on-surface)]">
+        Historial de Préstamos
+      </h4>
+      <div
+        id="history-loans-list"
+        class="flex flex-col gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar"
+      >
+        <!-- Loans will be injected here -->
+        <div class="flex flex-col gap-3">
+          <Skeleton height="60px" class="w-full" />
+          <Skeleton height="60px" class="w-full" />
+          <Skeleton height="60px" class="w-full" />
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-auto pt-4">
+      <Button
+        variant="outlined"
+        class="w-full"
+        onclick="window.closeStudentHistorySidesheet()"
+      >
+        Cerrar
+      </Button>
+    </div>
+  </div>
+</SideSheet>
+
+<script>
+  import {
+    getLoansByStudent,
+    updateLoan,
+    type Loan,
+  } from "../../services/firebase/loans";
+  import { type Student } from "../../services/firebase/students";
+
+  const studentNameEl = document.getElementById("history-student-name");
+  const studentMatriculaEl = document.getElementById(
+    "history-student-matricula",
+  );
+  const studentCareerEl = document.getElementById("history-student-career");
+  const loansListEl = document.getElementById("history-loans-list");
+
+  const totalLoansEl = document.getElementById("history-total-loans");
+  const activeLoansEl = document.getElementById("history-active-loans");
+
+  const careerMap: Record<string, string> = {
+    construccion: "Construcción",
+    contabilidad: "Contabilidad",
+    electricidad: "Electricidad",
+    electronica: "Electrónica",
+    enfermeria: "Enfermería General",
+    programacion: "Programación",
+    puericultura: "Puericultura",
+    secretariado: "Secretariado Ejecutivo",
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "-";
+    const [year, month, day] = dateString.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
+  // @ts-ignore
+  window.openStudentHistory = async (student: Student) => {
+    // @ts-ignore
+    window.openStudentHistorySidesheet();
+
+    // Reset UI
+    if (studentNameEl) studentNameEl.textContent = student.name;
+    if (studentMatriculaEl) studentMatriculaEl.textContent = student.matricula;
+    if (studentCareerEl)
+      studentCareerEl.textContent = careerMap[student.career] || student.career;
+
+    if (loansListEl)
+      loansListEl.innerHTML = `
+         <div class="flex flex-col gap-3 animate-pulse">
+             <div class="h-16 bg-[var(--m3-sys-surface-variant)]/30 rounded-xl"></div>
+             <div class="h-16 bg-[var(--m3-sys-surface-variant)]/30 rounded-xl"></div>
+         </div>
+    `;
+
+    try {
+      if (student.id) {
+        const loans = await getLoansByStudent(student.id);
+        renderLoans(loans);
+        updateStats(loans);
+      }
+    } catch (error) {
+      console.error("Error fetching student history:", error);
+      if (loansListEl)
+        loansListEl.innerHTML = `<p class="text-center text-[var(--m3-sys-error)]">Error al cargar el historial.</p>`;
+    }
+  };
+
+  const updateStats = (loans: Loan[]) => {
+    if (totalLoansEl) totalLoansEl.textContent = loans.length.toString();
+    if (activeLoansEl)
+      activeLoansEl.textContent = loans
+        .filter((l) => l.status === "active" || l.status === "overdue")
+        .length.toString();
+  };
+
+  const renderLoans = (loans: Loan[]) => {
+    if (!loansListEl) return;
+    loansListEl.innerHTML = "";
+
+    if (loans.length === 0) {
+      loansListEl.innerHTML = `
+            <div class="text-center py-8 text-[var(--m3-sys-on-surface-variant)] opacity-70">
+                <p>No hay registro de préstamos.</p>
+            </div>
+          `;
+      return;
+    }
+
+    loans.forEach((loan) => {
+      const isReturned = loan.status === "returned";
+      const isOverdue = loan.status === "overdue";
+      const isActive = loan.status === "active";
+
+      let statusColor =
+        "bg-[var(--m3-sys-outline)] text-[var(--m3-sys-on-surface-variant)]";
+      let statusText = "Desconocido";
+
+      if (isActive) {
+        statusColor =
+          "bg-[var(--m3-sys-primary-container)] text-[var(--m3-sys-on-primary-container)]";
+        statusText = "Activo";
+      } else if (isReturned) {
+        statusColor =
+          "bg-[var(--m3-sys-tertiary-container)] text-[var(--m3-sys-on-tertiary-container)]";
+        statusText = "Devuelto";
+      } else if (isOverdue) {
+        statusColor =
+          "bg-[var(--m3-sys-error-container)] text-[var(--m3-sys-on-error-container)]";
+        statusText = "Vencido";
+      }
+
+      const item = document.createElement("div");
+      item.className =
+        "flex flex-col gap-2 p-3 rounded-[var(--m3-radius-md)] border border-[var(--m3-sys-outline)]/20 bg-[var(--m3-sys-surface)] hover:bg-[var(--m3-sys-surface-variant)]/10 transition-colors";
+      item.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <h5 class="font-medium text-[var(--m3-sys-on-surface)] text-sm line-clamp-1">${loan.bookTitle}</h5>
+                    <p class="text-xs text-[var(--m3-sys-on-surface-variant)] mt-0.5">
+                        Prestado: ${formatDate(loan.loanDate)}
+                    </p>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-1 rounded-full ${statusColor}">
+                    ${statusText}
+                </span>
+            </div>
+            ${
+              isReturned && loan.returnDate
+                ? `
+                <div class="flex items-center gap-4 text-xs text-[var(--m3-sys-on-surface-variant)] pt-2 border-t border-[var(--m3-sys-outline)]/10">
+                    <span>Devuelto: ${formatDate(loan.returnDate)}</span>
+                    ${loan.returnCondition ? `<span class="capitalize ml-auto">Estado: ${loan.returnCondition}</span>` : ""}
+                </div>
+            `
+                : ""
+            }
+             ${
+               !isReturned
+                 ? `
+                <div class="flex items-center gap-4 text-xs text-[var(--m3-sys-on-surface-variant)] pt-2 border-t border-[var(--m3-sys-outline)]/10">
+                    <span>Vence: ${formatDate(loan.dueDate)}</span>
+                     <button
+                        class="ml-auto p-1.5 text-[var(--m3-sys-error)] hover:bg-[var(--m3-sys-error)]/10 rounded-full transition-colors btn-return-history"
+                        data-id="${loan.id}"
+                        title="Devolver Libro"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                    </button>
+                </div>
+            `
+                 : ""
+             }
+          `;
+      loansListEl.appendChild(item);
+    });
+
+    // Wire up return buttons in history
+    document.querySelectorAll(".btn-return-history").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const id = (btn as HTMLElement).dataset.id;
+        // Find loan in current scope (we need to pass loans to this function or scope)
+        // The renderLoans function receives `loans` argument!
+        const loan = loans.find((l) => l.id === id);
+
+        if (loan) {
+          // @ts-ignore
+          window.openReturnLoanSidesheet();
+          // @ts-ignore
+          window.populateReturnLoanForm(loan);
+        }
+      });
+    });
+  };
+</script>
+
+<style>
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--m3-sys-outline-variant);
+    border-radius: 20px;
+  }
+</style>

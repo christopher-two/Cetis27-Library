@@ -1,0 +1,139 @@
+---
+import SideSheet from "../../components/ui/SideSheet.astro";
+import TextField from "../../components/ui/TextField.astro";
+import Button from "../../components/ui/Button.astro";
+---
+
+<SideSheet id="return-loan-sidesheet" title="Devolver Libro">
+  <form class="flex flex-col gap-6" id="return-loan-form">
+    <input type="hidden" id="return-loan-id" />
+
+    <div class="flex flex-col gap-5">
+      <TextField
+        label="Alumno"
+        placeholder=""
+        readonly
+        id="return-loan-student"
+        class="opacity-70"
+      />
+      <TextField
+        label="Libro"
+        placeholder=""
+        readonly
+        id="return-loan-book"
+        class="opacity-70"
+      />
+
+      <TextField
+        label="Fecha Devolución"
+        type="date"
+        required
+        id="return-loan-date"
+      />
+
+      <div class="flex flex-col gap-2">
+        <label
+          class="text-sm font-medium text-[var(--m3-sys-on-surface-variant)] ml-1"
+          >Estado del Libro</label
+        >
+        <select
+          id="return-loan-condition"
+          class="w-full px-4 py-3 rounded-[var(--m3-radius-lg)] border border-[var(--m3-sys-outline)] bg-[var(--m3-sys-surface)] text-[var(--m3-sys-on-surface)] outline-none focus:border-[var(--m3-sys-primary)] transition-all"
+        >
+          <option value="bueno">Bueno</option>
+          <option value="dañado">Dañado</option>
+          <option value="perdido">Perdido</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label
+          class="text-sm font-medium text-[var(--m3-sys-on-surface-variant)] ml-1"
+          >Notas (Opcional)</label
+        >
+        <textarea
+          id="return-loan-notes"
+          rows="3"
+          class="w-full px-4 py-3 rounded-[var(--m3-radius-lg)] border border-[var(--m3-sys-outline)] bg-[var(--m3-sys-surface)] text-[var(--m3-sys-on-surface)] outline-none focus:border-[var(--m3-sys-primary)] transition-all resize-none"
+          placeholder="Detalles sobre el estado..."></textarea>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3 mt-4">
+      <Button
+        type="submit"
+        class="w-full !py-4 shadow-lg text-base !bg-[var(--m3-sys-error)] !text-[var(--m3-sys-on-error)] hover:!bg-[var(--m3-sys-error)]/90"
+      >
+        Confirmar Devolución
+      </Button>
+      <Button
+        variant="text"
+        type="button"
+        onclick="window.closeReturnLoanSidesheet()"
+        class="w-full">Cancelar</Button
+      >
+    </div>
+  </form>
+</SideSheet>
+
+<script>
+  import { updateLoan, type Loan } from "../../services/firebase/loans";
+
+  const form = document.getElementById("return-loan-form");
+
+  // @ts-ignore
+  window.populateReturnLoanForm = (loan: Loan) => {
+    (document.getElementById("return-loan-id") as HTMLInputElement).value =
+      loan.id;
+    (document.getElementById("return-loan-student") as HTMLInputElement).value =
+      loan.studentName;
+    (document.getElementById("return-loan-book") as HTMLInputElement).value =
+      loan.bookTitle;
+
+    // Default return date to today
+    (document.getElementById("return-loan-date") as HTMLInputElement).value =
+      new Date().toISOString().split("T")[0];
+
+    // Default condition
+    (
+      document.getElementById("return-loan-condition") as HTMLSelectElement
+    ).value = "bueno";
+    (
+      document.getElementById("return-loan-notes") as HTMLTextAreaElement
+    ).value = "";
+  };
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = (document.getElementById("return-loan-id") as HTMLInputElement)
+      .value;
+    const returnDate = (
+      document.getElementById("return-loan-date") as HTMLInputElement
+    ).value;
+    const returnCondition = (
+      document.getElementById("return-loan-condition") as HTMLSelectElement
+    ).value;
+    const notes = (
+      document.getElementById("return-loan-notes") as HTMLTextAreaElement
+    ).value;
+
+    try {
+      await updateLoan(id, {
+        status: "returned",
+        returnDate,
+        // @ts-ignore
+        returnCondition,
+        // @ts-ignore
+        notes,
+      });
+      // @ts-ignore
+      window.closeReturnLoanSidesheet();
+      alert("Devolución registrada correctamente");
+      // Refresh events if needed, but subscription handles it
+    } catch (error) {
+      console.error("Error returning loan", error);
+      alert("Error al registrar devolución");
+    }
+  });
+</script>

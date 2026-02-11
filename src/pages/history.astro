@@ -5,6 +5,7 @@ import MobileHeader from "../components/MobileHeader.astro";
 import LoanTable from "../features/dashboard/LoanTable.astro";
 import Card from "../components/ui/Card.astro";
 import EditLoanSideSheet from "../features/dashboard/EditLoanSideSheet.astro";
+import ReturnLoanSideSheet from "../features/dashboard/ReturnLoanSideSheet.astro";
 import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
 ---
 
@@ -160,6 +161,7 @@ import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
       </div>
     </main>
     <EditLoanSideSheet />
+    <ReturnLoanSideSheet />
     <ConfirmDeleteDialog
       id="delete-loan-dialog"
       title="Eliminar Préstamo"

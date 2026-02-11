@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import RegistrationSideSheet from "../features/registration/RegistrationSideSheet.astro";
+import ReturnLoanSideSheet from "../features/dashboard/ReturnLoanSideSheet.astro";
 import ReturnSideSheet from "../features/returns/ReturnSideSheet.astro";
 import NewStudentSideSheet from "../features/students/NewStudentSideSheet.astro";
 import DigitalAccessSideSheet from "../features/digital/DigitalAccessSideSheet.astro";
@@ -165,18 +166,18 @@ import Skeleton from "../components/ui/Skeleton.astro";
           <h3 class="text-lg font-medium text-[var(--m3-sys-on-surface)] mb-6">
             Acciones Rápidas
           </h3>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
             <button
               id="btn-new-loan-card"
-              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+              class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group h-auto min-h-[140px]"
             >
               <div
-                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-primary)]"
+                class="w-14 h-14 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-primary)]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="28"
+                  height="28"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -188,20 +189,20 @@ import Skeleton from "../components/ui/Skeleton.astro";
                   ></path><path d="M12 6v6"></path><path d="M9 9h6"></path></svg
                 >
               </div>
-              <span class="text-sm font-medium">Prestar Libro</span>
+              <span class="text-base font-medium">Prestar Libro</span>
             </button>
 
             <button
               id="btn-return-card"
-              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+              class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group h-auto min-h-[140px]"
             >
               <div
-                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-secondary)]"
+                class="w-14 h-14 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-secondary)]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="28"
+                  height="28"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -216,20 +217,20 @@ import Skeleton from "../components/ui/Skeleton.astro";
                     y2="3"></line></svg
                 >
               </div>
-              <span class="text-sm font-medium">Devolución</span>
+              <span class="text-base font-medium">Devolución</span>
             </button>
 
             <button
               id="btn-new-student-card"
-              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+              class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group h-auto min-h-[140px]"
             >
               <div
-                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-tertiary)]"
+                class="w-14 h-14 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-tertiary)]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="28"
+                  height="28"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -245,20 +246,20 @@ import Skeleton from "../components/ui/Skeleton.astro";
                   ></line></svg
                 >
               </div>
-              <span class="text-sm font-medium">Nuevo Alumno</span>
+              <span class="text-base font-medium">Nuevo Alumno</span>
             </button>
 
             <button
               id="btn-digital-access-card"
-              class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group"
+              class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-[var(--m3-sys-surface-variant)]/30 hover:bg-[var(--m3-sys-primary-container)] hover:text-[var(--m3-sys-on-primary-container)] text-[var(--m3-sys-on-surface)] transition-all group h-auto min-h-[140px]"
             >
               <div
-                class="w-12 h-12 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-error)]"
+                class="w-14 h-14 rounded-full bg-[var(--m3-sys-surface)] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform text-[var(--m3-sys-error)]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="28"
+                  height="28"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -270,13 +271,14 @@ import Skeleton from "../components/ui/Skeleton.astro";
                     points="21 15 16 10 5 21"></polyline></svg
                 >
               </div>
-              <span class="text-sm font-medium">Acceso Digital</span>
+              <span class="text-base font-medium">Acceso Digital</span>
             </button>
           </div>
         </Card>
       </div>
 
       <RegistrationSideSheet />
+      <ReturnLoanSideSheet />
       <ReturnSideSheet />
       <NewStudentSideSheet />
       <DigitalAccessSideSheet />

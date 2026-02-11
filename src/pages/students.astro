@@ -7,6 +7,8 @@ import Sidebar from "../components/Sidebar.astro";
 import MobileHeader from "../components/MobileHeader.astro";
 import NewStudentSideSheet from "../features/students/NewStudentSideSheet.astro";
 import EditStudentSideSheet from "../features/students/EditStudentSideSheet.astro";
+import StudentHistorySideSheet from "../features/students/StudentHistorySideSheet.astro";
+import ReturnLoanSideSheet from "../features/dashboard/ReturnLoanSideSheet.astro";
 import ConfirmDeleteDialog from "../components/ui/ConfirmDeleteDialog.astro";
 import Skeleton from "../components/ui/Skeleton.astro";
 
@@ -137,6 +139,8 @@ const headers = [
       </Card>
       <NewStudentSideSheet />
       <EditStudentSideSheet />
+      <StudentHistorySideSheet />
+      <ReturnLoanSideSheet />
       <ConfirmDeleteDialog
         id="delete-student-dialog"
         title="Eliminar Alumno"
@@ -227,13 +231,22 @@ const headers = [
             <button
               class="p-2 text-[var(--m3-sys-primary)] hover:bg-[var(--m3-sys-primary)]/10 rounded-full transition-colors edit-btn"
               data-student='${JSON.stringify(student).replace(/'/g, "&#39;")}'
+              title="Editar"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></svg>
+            </button>
+            <button
+                class="p-2 text-[var(--m3-sys-secondary)] hover:bg-[var(--m3-sys-secondary)]/10 rounded-full transition-colors history-btn"
+                data-student='${JSON.stringify(student).replace(/'/g, "&#39;")}'
+                title="Ver Historial"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
             </button>
             <button
               class="p-2 text-[var(--m3-sys-error)] hover:bg-[var(--m3-sys-error)]/10 rounded-full transition-colors delete-btn"
               data-id="${student.id}"
               data-name="${student.name}"
+              title="Eliminar"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
             </button>
@@ -241,6 +254,16 @@ const headers = [
         </td>
       `;
         tableBody.appendChild(row);
+      });
+
+      document.querySelectorAll(".history-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const student = JSON.parse(
+            (btn as HTMLElement).dataset.student || "{}",
+          );
+          // @ts-ignore
+          window.openStudentHistory(student);
+        });
       });
 
       document.querySelectorAll(".edit-btn").forEach((btn) => {
