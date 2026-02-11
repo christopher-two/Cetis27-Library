@@ -73,12 +73,19 @@ const canonicalURL = new URL(
     <script>
       import { auth } from "../lib/firebase";
       import { onAuthStateChanged } from "firebase/auth";
+      import { createUserProfile } from "../services/firebase/users";
 
       const currentPath = window.location.pathname;
 
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           localStorage.setItem("isAuthenticated", "true");
+          try {
+            await createUserProfile(user.uid, user.email || "");
+          } catch (e) {
+            console.error("Error creating profile:", e);
+          }
+
           if (currentPath === "/" || currentPath.startsWith("/login")) {
             window.location.href = "/dashboard";
           }

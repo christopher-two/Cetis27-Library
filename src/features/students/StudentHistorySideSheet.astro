@@ -172,8 +172,8 @@ const { id = "student-history-sidesheet" } = Astro.props;
     `;
 
     try {
-      if (student.id) {
-        const loans = await getLoansByStudent(student.id);
+      if (student.matricula) {
+        const loans = await getLoansByStudent(student.matricula);
         renderLoans(loans);
         updateStats(loans);
       }

@@ -43,16 +43,21 @@ export const subscribeToLoans = (callback: (loans: Loan[]) => void) => {
 };
 
 export const getLoansByStudent = async (studentId: string) => {
+  console.log("Fetching loans for studentId:", studentId);
   const q = query(
     collection(db, COLLECTION_NAME),
-    where("studentId", "==", studentId),
-    orderBy("loanDate", "desc")
+    where("studentId", "==", studentId)
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
+  console.log("Loans snapshot size:", snapshot.size);
+  const loans = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   })) as Loan[];
+  console.log("Mapped loans:", loans);
+
+  // Sort client-side to avoid needing a composite index
+  return loans.sort((a, b) => b.loanDate.localeCompare(a.loanDate));
 };
 
 export const addLoan = async (loan: Omit<Loan, "id">) => {

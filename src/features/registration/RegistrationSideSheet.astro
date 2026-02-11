@@ -150,7 +150,7 @@ import Button from "../../components/ui/Button.astro";
   } from "../../services/firebase/books";
   import { addLoan } from "../../services/firebase/loans";
   import {
-    subscribeToStudents,
+    searchStudents,
     type Student,
   } from "../../services/firebase/students";
 
@@ -158,8 +158,9 @@ import Button from "../../components/ui/Button.astro";
   let currentSelectedBookId: string | null = null;
   let allBooks: Book[] = [];
 
-  let allStudents: Student[] = [];
+  let allStudents: Student[] = []; // Ya no se usa para búsqueda general, solo para cache de resultados
   let currentSelectedStudent: Student | null = null;
+  let searchTimeout: any = null;
 
   const bookSearch = document.getElementById("book-search") as HTMLInputElement;
   const bookDropdown = document.getElementById("book-dropdown");
@@ -179,20 +180,9 @@ import Button from "../../components/ui/Button.astro";
     allBooks = books;
   });
 
-  // Subscribe to real students data
-  subscribeToStudents((students) => {
-    allStudents = students;
-  });
+  // Removed subscribeToStudents to prevent data leak
 
-  function filterStudents(query: string) {
-    if (!query) return [];
-    const lowerQuery = query.toLowerCase();
-    return allStudents.filter(
-      (student) =>
-        student.name.toLowerCase().includes(lowerQuery) ||
-        student.matricula.toLowerCase().includes(lowerQuery),
-    );
-  }
+  // filterStudents removed in favor of server-side search
 
   function renderStudentOptions(options: Student[]) {
     if (!studentOptionsList) return;
@@ -236,9 +226,20 @@ import Button from "../../components/ui/Button.astro";
       return;
     }
 
-    const filtered = filterStudents(query);
-    renderStudentOptions(filtered);
-    if (studentDropdown) studentDropdown.classList.remove("hidden");
+    // Debounce search
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    searchTimeout = setTimeout(async () => {
+      if (query.length < 2) return;
+
+      try {
+        const results = await searchStudents(query);
+        renderStudentOptions(results);
+        if (studentDropdown) studentDropdown.classList.remove("hidden");
+      } catch (error) {
+        console.error("Error searching students:", error);
+      }
+    }, 300);
   });
 
   studentSearch?.addEventListener("focus", () => {

@@ -1,8 +1,45 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to check if the user is an admin
+    // We assume a 'users' collection exists where the document ID is the UID
+    // and has a field 'role' with value 'admin'.
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Users collection: Users can read their own profile. Only admins can write, OR create their own initial profile.
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && request.auth.uid == userId; // Bootstrap: Users can create their own profile
+      allow update, delete: if isAdmin(); // Only admins can edit roles or delete users
+    }
+
+    // Students, Books, Loans: Only admins can read/write (Strict for now)
+    // If students need to see their own loans, we can relax this later.
+    match /students/{studentId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /books/{bookId} {
+      allow read: if isAuthenticated(); // All authenticated users (librarians) can see books
+      allow write: if isAdmin();
+    }
+
+    match /loans/{loanId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Default deny
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }
