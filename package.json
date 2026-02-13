@@ -9,7 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.2",
+    "@astrojs/cloudflare": "^12.6.12",
     "@genkit-ai/googleai": "^1.28.0",
     "apexcharts": "^5.3.6",
     "astro": "^5.17.1",
