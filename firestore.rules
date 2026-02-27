@@ -33,12 +33,6 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Events: Public read (or authenticated), Admin write
-    match /events/{eventId} {
-      allow read: if true; // Publicly visible
-      allow write: if isAdmin();
-    }
-
     // Registrations: Users can read/create their own. Admins can read/write all.
     match /registrations/{registrationId} {
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());

@@ -112,7 +112,8 @@ input[type="date"] {
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
-  position: relative; /* CRITICAL: Contains the absolute picker indicator */
+  position: relative;
+  /* CRITICAL: Contains the absolute picker indicator */
 }
 
 input[type="date"]:focus {
@@ -140,34 +141,30 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Shimmer Animation */
 @keyframes shimmer {
   0% {
-    background-position: -468px 0;
+    background-position: 200% 0;
   }
+
   100% {
-    background-position: 468px 0;
+    background-position: -200% 0;
   }
 }
 
 .shimmer {
-  background: linear-gradient(
-    to right,
-    var(--m3-sys-surface-variant) 8%,
-    var(--m3-sys-surface) 18%,
-    var(--m3-sys-surface-variant) 33%
-  );
-  background-size: 800px 104px;
-  animation: shimmer 1.5s linear infinite forwards;
+  background-image: linear-gradient(90deg,
+      var(--m3-sys-surface-variant) 0%,
+      var(--m3-sys-surface) 50%,
+      var(--m3-sys-surface-variant) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
   position: relative;
   overflow: hidden;
 }
 
 [data-theme="dark"] .shimmer {
-  background: linear-gradient(
-    to right,
-    var(--m3-sys-surface-variant) 8%,
-    var(--m3-sys-surface) 18%,
-    var(--m3-sys-surface-variant) 33%
-  );
-  background-size: 800px 400px;
+  background-image: linear-gradient(90deg,
+      var(--m3-sys-surface-variant) 0%,
+      var(--m3-sys-surface) 50%,
+      var(--m3-sys-surface-variant) 100%);
 }
 
 /* Custom Material 3 Scrollbar */
@@ -189,7 +186,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   *::-webkit-scrollbar-thumb {
     background-color: var(--m3-sys-primary);
     border-radius: 10px;
-    border: 3px solid var(--m3-sys-surface); /* Floating effect */
+    border: 3px solid var(--m3-sys-surface);
+    /* Floating effect */
     background-clip: content-box;
     transition: background-color 0.2s ease;
   }
@@ -198,4 +196,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-color: var(--m3-sys-primary-container);
   }
 }
-
