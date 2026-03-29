@@ -31,8 +31,8 @@ import Skeleton from "../ui/Skeleton.astro";
   let chart: ApexCharts | null = null;
 
   // Define color palettes
-  const lightModeColors = ["#D32F2F", "#EF5350"]; // Dark Red, Light Red (Light Mode)
-  const darkModeColors = ["#EF9A9A", "#FFCDD2"]; // Pastel Red, Very Light Red (Dark Mode)
+  const lightModeColors = ["#4f739c", "#8ca7c7"]; // Soft blues for Light Mode
+  const darkModeColors = ["#9ebcdc", "#c0d7f5"]; // Soft blues for Dark Mode
 
   const getThemeColors = () => {
     return document.documentElement.classList.contains("dark")

@@ -22,23 +22,22 @@ import Skeleton from "../ui/Skeleton.astro";
   let chart: ApexCharts | null = null;
 
   // Define color palettes
-  // Define color palettes
   const lightModeColors = [
-    "#B71C1C",
-    "#C62828",
-    "#880E4F",
-    "#BF360C",
-    "#4A148C",
-    "#E65100",
-  ]; // Dark Reds/Oranges/Pinks for Light Mode
+    "#4f739c",
+    "#5d7fa8",
+    "#6b8cb2",
+    "#7b99bc",
+    "#8ca7c7",
+    "#9cb4d1",
+  ]; // Soft blues for Light Mode
   const darkModeColors = [
-    "#EF9A9A",
-    "#FFAB91",
-    "#F48FB1",
-    "#FFCC80",
-    "#CE93D8",
-    "#FFAB40",
-  ]; // Pastel Reds/Oranges/Pinks for Dark Mode
+    "#7f9fbe",
+    "#8daecc",
+    "#9ebcdc",
+    "#afcaea",
+    "#c0d7f5",
+    "#d1e4ff",
+  ]; // Soft blues for Dark Mode
 
   const getThemeColors = () => {
     return document.documentElement.classList.contains("dark")
