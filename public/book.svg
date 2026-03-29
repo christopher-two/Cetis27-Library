@@ -5,7 +5,16 @@
   viewBox="0 0 64 64"
   fill="none"
 >
-  <rect x="8" y="6" width="48" height="52" rx="8" fill="#f6f9fd" />
+  <rect
+    x="8"
+    y="6"
+    width="48"
+    height="52"
+    rx="8"
+    fill="#e9eff7"
+    stroke="#97a9be"
+    stroke-width="2"
+  />
   <path
     d="M18 16.5A3.5 3.5 0 0 1 21.5 13H46V43H21.5A3.5 3.5 0 0 0 18 46.5V16.5Z"
     stroke="#4b5e74"
