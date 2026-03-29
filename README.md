@@ -1,6 +1,6 @@
-# 📚 Biblioteca Digital - Cetis 27
+# 📚 Biblioteca Digital - Override Index
 
-Sistema integral de gestión bibliotecaria desarrollado por **Override** para el **Cetis 27**. Esta plataforma permite administrar de manera eficiente préstamos, inventario de libros y el directorio de alumnos con integración en tiempo real.
+Sistema integral de gestion bibliotecaria desarrollado por **Override Index**. Esta plataforma permite administrar de manera eficiente prestamos, inventario de libros y el directorio de alumnos con integracion en tiempo real.
 
 ---
 
@@ -49,8 +49,8 @@ Sistema integral de gestión bibliotecaria desarrollado por **Override** para el
 1.  **Clonar el repositorio:**
 
     ```bash
-    git clone https://github.com/christopher-two/Cetis27-Library.git
-    cd Cetis27-Library
+    git clone <url-del-repositorio>
+    cd <nombre-del-repositorio>
     ```
 
 2.  **Instalar dependencias:**
